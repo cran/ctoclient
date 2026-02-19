@@ -1,0 +1,17 @@
+{
+    "id": "band_members",
+    "title": "band_members",
+    "discriminator": "DATA",
+    "groupId": 1,
+    "allowOfflineUpdates": false,
+    "uniqueRecordField": null,
+    "fieldNames": null,
+    "casesManagementOptions": null,
+    "idFormatOptions": null,
+    "createdOn": "2026-02-14T18:02:05.000Z",
+    "modifiedOn": "2026-02-14T18:02:05.000Z",
+    "lastIncomingDataDate": null,
+    "totalRecords": 0,
+    "status": "READY",
+    "version": 0
+}

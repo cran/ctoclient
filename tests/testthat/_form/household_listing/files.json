@@ -1,0 +1,78 @@
+{
+    "xForm": {
+        "formId": "household_listing",
+        "version": "2406270842",
+        "title": "Household Listing and Mapping",
+        "creationDate": 1769581533000,
+        "creationUser": "uid:4794dd295f1283c1cfa4fb2eb1e18058|2026-01-14T11:18:01.805+0000",
+        "formFilename": "Form/Form definition - Household Listing and Mapping",
+        "encrypted": false,
+        "base64rsaPublicKey": null,
+        "submissionEnabled": true,
+        "downloadEnabled": true,
+        "xmlDefinitionHash": "md5:4a4d6107feb3fb978b9fd3cdbf83fb34",
+        "xmlDefinition": null,
+        "formStatus": "READY",
+        "lastIncomingDataDate": 0,
+        "webDataCollectionAnonymousEnabled": false,
+        "webDataCollectionAppearance": "apprnc-default",
+        "webDataCollectionAutoDetectBrowserLanguage": true,
+        "webDataCollectionFormFillingSettings": {
+            "allowNonLinearNavigation": true,
+            "allowGoToMenu": true,
+            "allowJumpToStart": true,
+            "allowJumpToEnd": true,
+            "allowSkipToNext": true,
+            "hyperlinkFieldReferences": true,
+            "locationWithinGroups": "ON",
+            "overrideDefaultWidth": false,
+            "allowUserSelectedWidth": false,
+            "startOverBehavior": "ONLY_LOGGED_IN",
+            "hideLoginOptions": true,
+            "disableSwipeNavigation": false,
+            "useLegacyUI": false
+        },
+        "draftVersion": null,
+        "deployed": true,
+        "apiKey": null,
+        "groupId": 2,
+        "ordinal": 1.0,
+        "reviewWorkflowEnabled": false,
+        "reviewWorkflowConfig": null,
+        "advancedExportMode": false,
+        "advancedMonitorMode": false,
+        "googleDriveSources": null
+    },
+    "deployedGroupFiles": {
+        "definitionFile": {
+            "id": 0,
+            "formVersion": "2406270842",
+            "filename": "Form/Form definition - Household Listing and Mapping.xlsx",
+            "downloadLink": "https://sctopackagetest.surveycto.com/forms/household_listing/file-attachment/8/download?file=Form%25252FForm%252Bdefinition%252B-%252BHousehold%252BListing%252Band%252BMapping.xlsx&as_attachment=true",
+            "dateStr": "Jan. 28, 2026 at 6:25AM",
+            "actor": "girjagutama@gmail.com"
+        },
+        "xmlDefinitionFile": {
+            "id": 0,
+            "formVersion": null,
+            "filename": null,
+            "downloadLink": "https://sctopackagetest.surveycto.com/forms/household_listing/xml?t=1771092118859",
+            "dateStr": "Jan. 28, 2026 at 6:25AM",
+            "actor": "girjagutama@gmail.com"
+        },
+        "mediaFiles": {
+            "locations.csv": {
+                "id": 0,
+                "formVersion": null,
+                "filename": null,
+                "downloadLink": "/forms/household_listing/dataset-attachment/locations/locations.csv?as_attachment=true",
+                "dateStr": "Jan. 28, 2026 at 6:25AM",
+                "actor": "dataset (locations)"
+            }
+        }
+    },
+    "draftGroupFiles": null,
+    "previousDefinitionFiles": [
+
+    ]
+}

@@ -1,0 +1,1109 @@
+{
+    "canAddObjectsIntoRoot": true,
+    "groups": [
+        {
+            "id": 1,
+            "title": "The root or home group (outside all groups)",
+            "parentGroupId": null,
+            "ordinal": 0.0,
+            "teamGroup": false,
+            "teamId": null
+        },
+        {
+            "id": 2,
+            "title": "Household",
+            "parentGroupId": 1,
+            "ordinal": 1.2,
+            "teamGroup": false,
+            "teamId": null
+        },
+        {
+            "id": 3,
+            "title": "Sample",
+            "parentGroupId": 1,
+            "ordinal": 1.3,
+            "teamGroup": false,
+            "teamId": null
+        }
+    ],
+    "datasets": [
+        {
+            "id": "household_data",
+            "rawDataTableName": "__DATASET_RAWDATA_d9f266962c83e290e0b084a9674abb2c",
+            "title": "Household data",
+            "type": "SERVER",
+            "status": "READY",
+            "version": 1,
+            "outgoingFormIds": [
+                "locating_households"
+            ],
+            "dataLinkSummaries": [
+                {
+                    "id": 2,
+                    "objectId": "household_data",
+                    "linkType": "INCOMING",
+                    "linkClass": "FORM",
+                    "linkFormat": 0,
+                    "linkObjectId": "locating_households",
+                    "fieldMap": [
+                        {
+                            "formField": "hh_id",
+                            "datasetField": "hh_id_key",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": null
+                        },
+                        {
+                            "formField": "hh_address_updated",
+                            "datasetField": "hh_address",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": null
+                        },
+                        {
+                            "formField": "hh_name_updated",
+                            "datasetField": "hh_name",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": null
+                        },
+                        {
+                            "formField": "hh_phone_1_updated",
+                            "datasetField": "hh_phone_1",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": null
+                        },
+                        {
+                            "formField": "hh_phone_2_updated",
+                            "datasetField": "hh_phone_2",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": null
+                        }
+                    ],
+                    "joiningField": "hh_id",
+                    "relevanceField": "",
+                    "linkName": null,
+                    "publishError": null,
+                    "progressSummary": null,
+                    "publishingStatus": {
+                        "waitingPublishers": 0,
+                        "active": false
+                    },
+                    "containsManualPublishingConfiguration": true,
+                    "autoConfigured": false,
+                    "longFormat": false
+                }
+            ],
+            "fieldNames": [
+                "hh_id_key",
+                "hh_address",
+                "hh_name",
+                "hh_phone_1",
+                "hh_phone_2",
+                "hh_head_img",
+                "hh_house_img",
+                "hh_latitude",
+                "hh_longitude"
+            ],
+            "rows": 4,
+            "snapshotMonitor": null,
+            "snapshotError": null,
+            "apiKey": null,
+            "uniqueRecordField": null,
+            "allowOfflineUpdates": false,
+            "groupId": 2,
+            "ordinal": 1.3,
+            "casesDataset": false,
+            "options": null,
+            "qcCount": 0,
+            "datasetOptionsModel": {
+                "idColumn": null,
+                "sendEmailOnQCWarnings": false,
+                "emailAddressesToReportQCWarnings": null,
+                "schedulingEnabled": false,
+                "sourceFilter": null,
+                "lastQCRunDate": null,
+                "idColumnSet": false
+            },
+            "discriminator": "DATA",
+            "linkedDatasets": null,
+            "showLinkedToLabel": null
+        },
+        {
+            "id": "locations",
+            "rawDataTableName": "__DATASET_RAWDATA_b4c0b6c75f651ee809fd20c087a4a533",
+            "title": "Locations",
+            "type": "SERVER",
+            "status": "READY",
+            "version": 1,
+            "outgoingFormIds": [
+                "household_listing"
+            ],
+            "dataLinkSummaries": [
+
+            ],
+            "fieldNames": [
+                "province_id_key",
+                "province",
+                "district_id_key",
+                "district",
+                "ea_id_key",
+                "ea"
+            ],
+            "rows": 20,
+            "snapshotMonitor": null,
+            "snapshotError": null,
+            "apiKey": null,
+            "uniqueRecordField": null,
+            "allowOfflineUpdates": false,
+            "groupId": 2,
+            "ordinal": 1.1,
+            "casesDataset": false,
+            "options": null,
+            "qcCount": 0,
+            "datasetOptionsModel": {
+                "idColumn": null,
+                "sendEmailOnQCWarnings": false,
+                "emailAddressesToReportQCWarnings": null,
+                "schedulingEnabled": false,
+                "sourceFilter": null,
+                "lastQCRunDate": null,
+                "idColumnSet": false
+            },
+            "discriminator": "DATA",
+            "linkedDatasets": null,
+            "showLinkedToLabel": null
+        },
+        {
+            "id": "sample_cases",
+            "rawDataTableName": "__DATASET_RAWDATA_5f1820efd81d64efbb7c93f3cea19a81",
+            "title": "Sample cases",
+            "type": "SERVER",
+            "status": "READY",
+            "version": 3,
+            "outgoingFormIds": [
+                "sample_management_household_tracking"
+            ],
+            "dataLinkSummaries": [
+                {
+                    "id": 4,
+                    "objectId": "sample_cases",
+                    "linkType": "INCOMING",
+                    "linkClass": "FORM",
+                    "linkFormat": 0,
+                    "linkObjectId": "sample_management_household_tracking",
+                    "fieldMap": [
+                        {
+                            "formField": "caseid",
+                            "datasetField": "id",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        },
+                        {
+                            "formField": "pub_to_users",
+                            "datasetField": "users",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        },
+                        {
+                            "formField": "counter",
+                            "datasetField": "num_visits",
+                            "updateLogicAction": "ADD_TO_NUMERIC_VALUE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        },
+                        {
+                            "formField": "starttime",
+                            "datasetField": "visit_datetimes",
+                            "updateLogicAction": "CONCATENATE_TO_TEXT",
+                            "updateLogicOptions": {
+                                "separator": "|",
+                                "position": "BEGINNING"
+                            }
+                        },
+                        {
+                            "formField": "new_reschedule",
+                            "datasetField": "reschedule",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        }
+                    ],
+                    "joiningField": "caseid",
+                    "relevanceField": "",
+                    "linkName": null,
+                    "publishError": null,
+                    "progressSummary": null,
+                    "publishingStatus": {
+                        "waitingPublishers": 0,
+                        "active": false
+                    },
+                    "containsManualPublishingConfiguration": true,
+                    "autoConfigured": false,
+                    "longFormat": false
+                }
+            ],
+            "fieldNames": [
+                "id",
+                "label",
+                "formids",
+                "users",
+                "roles",
+                "sortby",
+                "enumerators",
+                "num_visits",
+                "visit_datetimes",
+                "reschedule"
+            ],
+            "rows": 5,
+            "snapshotMonitor": null,
+            "snapshotError": null,
+            "apiKey": null,
+            "uniqueRecordField": "id",
+            "allowOfflineUpdates": true,
+            "groupId": 3,
+            "ordinal": 1.2,
+            "casesDataset": true,
+            "options": "{\"displayMode\":\"table\",\"showFinalizedSentWhenTree\":true,\"showColumnsWhenTable\":[\"id\",\"label\"],\"enumeratorDatasetId\":\"\",\"otherUserCode\":\"\",\"entryMode\":\"LIST\"}",
+            "qcCount": 0,
+            "datasetOptionsModel": {
+                "idColumn": null,
+                "sendEmailOnQCWarnings": false,
+                "emailAddressesToReportQCWarnings": null,
+                "schedulingEnabled": false,
+                "sourceFilter": null,
+                "lastQCRunDate": null,
+                "idColumnSet": false
+            },
+            "discriminator": "CASES",
+            "linkedDatasets": null,
+            "showLinkedToLabel": false
+        },
+        {
+            "id": "sample_enumerators",
+            "rawDataTableName": "__DATASET_RAWDATA_7f0f45b3b94ae0661d8586479b768296",
+            "title": "Sample enumerators",
+            "type": "SERVER",
+            "status": "READY",
+            "version": 3,
+            "outgoingFormIds": [
+                "sample_management_household_tracking"
+            ],
+            "dataLinkSummaries": [
+                {
+                    "id": 3,
+                    "objectId": "sample_enumerators",
+                    "linkType": "INCOMING",
+                    "linkClass": "FORM",
+                    "linkFormat": 0,
+                    "linkObjectId": "sample_management_household_tracking",
+                    "fieldMap": [
+                        {
+                            "formField": "enumerator_id",
+                            "datasetField": "id",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        },
+                        {
+                            "formField": "counter",
+                            "datasetField": "num_visits",
+                            "updateLogicAction": "ADD_TO_NUMERIC_VALUE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        },
+                        {
+                            "formField": "completed",
+                            "datasetField": "completed",
+                            "updateLogicAction": "ADD_TO_NUMERIC_VALUE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        },
+                        {
+                            "formField": "interviewed",
+                            "datasetField": "interviewed",
+                            "updateLogicAction": "ADD_TO_NUMERIC_VALUE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        }
+                    ],
+                    "joiningField": "enumerator_id",
+                    "relevanceField": "",
+                    "linkName": null,
+                    "publishError": null,
+                    "progressSummary": null,
+                    "publishingStatus": {
+                        "waitingPublishers": 0,
+                        "active": false
+                    },
+                    "containsManualPublishingConfiguration": true,
+                    "autoConfigured": true,
+                    "longFormat": false
+                }
+            ],
+            "fieldNames": [
+                "id",
+                "name",
+                "users",
+                "num_visits",
+                "completed",
+                "interviewed"
+            ],
+            "rows": 3,
+            "snapshotMonitor": null,
+            "snapshotError": null,
+            "apiKey": null,
+            "uniqueRecordField": "id",
+            "allowOfflineUpdates": true,
+            "groupId": 3,
+            "ordinal": 1.1,
+            "casesDataset": false,
+            "options": "{\"prefix\":\"\",\"numberOfDigits\":6,\"suffix\":\"\",\"allowCapitalLetters\":false}",
+            "qcCount": 0,
+            "datasetOptionsModel": {
+                "idColumn": null,
+                "sendEmailOnQCWarnings": false,
+                "emailAddressesToReportQCWarnings": null,
+                "schedulingEnabled": false,
+                "sourceFilter": null,
+                "lastQCRunDate": null,
+                "idColumnSet": false
+            },
+            "discriminator": "ENUMERATORS",
+            "linkedDatasets": [
+
+            ],
+            "showLinkedToLabel": true
+        },
+        {
+            "id": "test",
+            "rawDataTableName": "__DATASET_RAWDATA_098f6bcd4621d373cade4e832627b4f6",
+            "title": "Test",
+            "type": "SERVER",
+            "status": "READY",
+            "version": 6,
+            "outgoingFormIds": [
+
+            ],
+            "dataLinkSummaries": [
+
+            ],
+            "fieldNames": [
+                "mpg",
+                "cyl",
+                "disp",
+                "hp",
+                "drat",
+                "wt",
+                "qsec",
+                "vs",
+                "am",
+                "gear",
+                "carb"
+            ],
+            "rows": 0,
+            "snapshotMonitor": null,
+            "snapshotError": null,
+            "apiKey": null,
+            "uniqueRecordField": null,
+            "allowOfflineUpdates": false,
+            "groupId": 1,
+            "ordinal": 1.1,
+            "casesDataset": false,
+            "options": null,
+            "qcCount": 0,
+            "datasetOptionsModel": {
+                "idColumn": null,
+                "sendEmailOnQCWarnings": false,
+                "emailAddressesToReportQCWarnings": null,
+                "schedulingEnabled": false,
+                "sourceFilter": null,
+                "lastQCRunDate": null,
+                "idColumnSet": false
+            },
+            "discriminator": "DATA",
+            "linkedDatasets": null,
+            "showLinkedToLabel": null
+        },
+        {
+            "id": "wbg_hh_enumerators",
+            "rawDataTableName": "__DATASET_RAWDATA_c8bf41c0ee10a79afe7ede0140185228",
+            "title": "WBG Household Enumerators",
+            "type": "SERVER",
+            "status": "READY",
+            "version": 1,
+            "outgoingFormIds": [
+                "wbg_hh_roster"
+            ],
+            "dataLinkSummaries": [
+                {
+                    "id": 5,
+                    "objectId": "wbg_hh_enumerators",
+                    "linkType": "INCOMING",
+                    "linkClass": "FORM",
+                    "linkFormat": 0,
+                    "linkObjectId": "wbg_hh_roster",
+                    "fieldMap": [
+
+                    ],
+                    "joiningField": null,
+                    "relevanceField": null,
+                    "linkName": null,
+                    "publishError": null,
+                    "progressSummary": null,
+                    "publishingStatus": {
+                        "waitingPublishers": 0,
+                        "active": false
+                    },
+                    "containsManualPublishingConfiguration": false,
+                    "autoConfigured": true,
+                    "longFormat": false
+                }
+            ],
+            "fieldNames": [
+                "id",
+                "name",
+                "users"
+            ],
+            "rows": 3,
+            "snapshotMonitor": null,
+            "snapshotError": null,
+            "apiKey": null,
+            "uniqueRecordField": "id",
+            "allowOfflineUpdates": true,
+            "groupId": 2,
+            "ordinal": 1.3,
+            "casesDataset": false,
+            "options": "{\"prefix\":\"\",\"numberOfDigits\":4,\"suffix\":\"\",\"allowCapitalLetters\":false}",
+            "qcCount": 0,
+            "datasetOptionsModel": {
+                "idColumn": null,
+                "sendEmailOnQCWarnings": false,
+                "emailAddressesToReportQCWarnings": null,
+                "schedulingEnabled": false,
+                "sourceFilter": null,
+                "lastQCRunDate": null,
+                "idColumnSet": false
+            },
+            "discriminator": "ENUMERATORS",
+            "linkedDatasets": [
+
+            ],
+            "showLinkedToLabel": true
+        }
+    ],
+    "serverDatasetPublishingInfo": {
+        "formsToDatasetsPublishingQueueSize": 0,
+        "formsToDatasetsSuspendedCount": 0
+    },
+    "forms": [
+        {
+            "title": "langs",
+            "id": "d$langs",
+            "version": "2601211216",
+            "creationDate": 1768997789000,
+            "createdUser": "uid:4794dd295f1283c1cfa4fb2eb1e18058|2026-01-14T11:18:01.805+0000",
+            "completeSubmissionCount": 0,
+            "incompleteSubmissionCount": 0,
+            "unreviewedSubmissionCount": 0,
+            "approvedSubmissionCount": 0,
+            "rejectedSubmissionCount": 0,
+            "formFields": null,
+            "testForm": false,
+            "encrypted": false,
+            "draftVersion": null,
+            "deployed": false,
+            "webDataCollectionAnonymousEnabled": false,
+            "webDataCollectionAppearance": "apprnc-default",
+            "webDataCollectionAutoDetectBrowserLanguage": true,
+            "qcCount": 0,
+            "datasetOptionsModel": {
+                "idColumn": "KEY",
+                "sendEmailOnQCWarnings": false,
+                "emailAddressesToReportQCWarnings": null,
+                "schedulingEnabled": false,
+                "sourceFilter": null,
+                "lastQCRunDate": null,
+                "idColumnSet": true
+            },
+            "dataLinkSummaries": [
+
+            ],
+            "attachedDatasetIds": [
+
+            ],
+            "lastIncomingDataDate": 0,
+            "groupId": 1,
+            "ordinal": 1.0,
+            "reviewWorkflowEnabled": false,
+            "reviewWorkflowConfig": {
+                "whichSubmissions": "ALL",
+                "useInitialQCResults": false,
+                "flagSubmissionSpecific": false,
+                "flagGroupSpecific": false,
+                "flagFieldSpecific": false,
+                "flagCriticalOnly": false,
+                "useRandomSelection": true,
+                "randomSamplePercent": 10.0,
+                "requireCommentsOnCorrections": false,
+                "allowRedoReview": false,
+                "allowApproveAll": false,
+                "encryptUserComments": true
+            },
+            "formFillingSettings": {
+                "allowNonLinearNavigation": true,
+                "allowGoToMenu": true,
+                "allowJumpToStart": true,
+                "allowJumpToEnd": true,
+                "allowSkipToNext": true,
+                "hyperlinkFieldReferences": true,
+                "locationWithinGroups": "ON",
+                "overrideDefaultWidth": false,
+                "allowUserSelectedWidth": false,
+                "startOverBehavior": "ONLY_LOGGED_IN",
+                "hideLoginOptions": true,
+                "disableSwipeNavigation": false,
+                "useLegacyUI": false
+            },
+            "advancedExportMode": false,
+            "advancedMonitorMode": false,
+            "exportWorkbookSummaries": [
+
+            ],
+            "monitorWorkbookSummaries": [
+
+            ],
+            "googleDriveSources": null,
+            "downloadable": true
+        },
+        {
+            "title": "Household Listing and Mapping",
+            "id": "household_listing",
+            "version": "2406270842",
+            "creationDate": 1769581533000,
+            "createdUser": "uid:4794dd295f1283c1cfa4fb2eb1e18058|2026-01-14T11:18:01.805+0000",
+            "completeSubmissionCount": 0,
+            "incompleteSubmissionCount": 0,
+            "unreviewedSubmissionCount": 0,
+            "approvedSubmissionCount": 0,
+            "rejectedSubmissionCount": 0,
+            "formFields": null,
+            "testForm": false,
+            "encrypted": false,
+            "draftVersion": null,
+            "deployed": true,
+            "webDataCollectionAnonymousEnabled": false,
+            "webDataCollectionAppearance": "apprnc-default",
+            "webDataCollectionAutoDetectBrowserLanguage": true,
+            "qcCount": 0,
+            "datasetOptionsModel": {
+                "idColumn": "KEY",
+                "sendEmailOnQCWarnings": false,
+                "emailAddressesToReportQCWarnings": null,
+                "schedulingEnabled": false,
+                "sourceFilter": null,
+                "lastQCRunDate": null,
+                "idColumnSet": true
+            },
+            "dataLinkSummaries": [
+
+            ],
+            "attachedDatasetIds": [
+                "locations"
+            ],
+            "lastIncomingDataDate": 0,
+            "groupId": 2,
+            "ordinal": 1.0,
+            "reviewWorkflowEnabled": false,
+            "reviewWorkflowConfig": {
+                "whichSubmissions": "ALL",
+                "useInitialQCResults": false,
+                "flagSubmissionSpecific": false,
+                "flagGroupSpecific": false,
+                "flagFieldSpecific": false,
+                "flagCriticalOnly": false,
+                "useRandomSelection": true,
+                "randomSamplePercent": 10.0,
+                "requireCommentsOnCorrections": false,
+                "allowRedoReview": false,
+                "allowApproveAll": false,
+                "encryptUserComments": true
+            },
+            "formFillingSettings": {
+                "allowNonLinearNavigation": true,
+                "allowGoToMenu": true,
+                "allowJumpToStart": true,
+                "allowJumpToEnd": true,
+                "allowSkipToNext": true,
+                "hyperlinkFieldReferences": true,
+                "locationWithinGroups": "ON",
+                "overrideDefaultWidth": false,
+                "allowUserSelectedWidth": false,
+                "startOverBehavior": "ONLY_LOGGED_IN",
+                "hideLoginOptions": true,
+                "disableSwipeNavigation": false,
+                "useLegacyUI": false
+            },
+            "advancedExportMode": false,
+            "advancedMonitorMode": false,
+            "exportWorkbookSummaries": [
+
+            ],
+            "monitorWorkbookSummaries": [
+
+            ],
+            "googleDriveSources": null,
+            "downloadable": true
+        },
+        {
+            "title": "Sample management: Household tracking",
+            "id": "sample_management_household_tracking",
+            "version": "2309291156",
+            "creationDate": 1769581747000,
+            "createdUser": "uid:4794dd295f1283c1cfa4fb2eb1e18058|2026-01-14T11:18:01.805+0000",
+            "completeSubmissionCount": 2,
+            "incompleteSubmissionCount": 0,
+            "unreviewedSubmissionCount": 0,
+            "approvedSubmissionCount": 2,
+            "rejectedSubmissionCount": 0,
+            "formFields": null,
+            "testForm": false,
+            "encrypted": false,
+            "draftVersion": null,
+            "deployed": true,
+            "webDataCollectionAnonymousEnabled": false,
+            "webDataCollectionAppearance": "apprnc-default",
+            "webDataCollectionAutoDetectBrowserLanguage": true,
+            "qcCount": 0,
+            "datasetOptionsModel": {
+                "idColumn": "KEY",
+                "sendEmailOnQCWarnings": false,
+                "emailAddressesToReportQCWarnings": null,
+                "schedulingEnabled": false,
+                "sourceFilter": null,
+                "lastQCRunDate": null,
+                "idColumnSet": true
+            },
+            "dataLinkSummaries": [
+                {
+                    "id": 3,
+                    "objectId": "sample_enumerators",
+                    "linkType": "INCOMING",
+                    "linkClass": "FORM",
+                    "linkFormat": 0,
+                    "linkObjectId": "sample_management_household_tracking",
+                    "fieldMap": [
+                        {
+                            "formField": "enumerator_id",
+                            "datasetField": "id",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        },
+                        {
+                            "formField": "counter",
+                            "datasetField": "num_visits",
+                            "updateLogicAction": "ADD_TO_NUMERIC_VALUE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        },
+                        {
+                            "formField": "completed",
+                            "datasetField": "completed",
+                            "updateLogicAction": "ADD_TO_NUMERIC_VALUE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        },
+                        {
+                            "formField": "interviewed",
+                            "datasetField": "interviewed",
+                            "updateLogicAction": "ADD_TO_NUMERIC_VALUE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        }
+                    ],
+                    "joiningField": "enumerator_id",
+                    "relevanceField": "",
+                    "linkName": null,
+                    "publishError": null,
+                    "progressSummary": null,
+                    "publishingStatus": {
+                        "waitingPublishers": 0,
+                        "active": false
+                    },
+                    "containsManualPublishingConfiguration": true,
+                    "autoConfigured": true,
+                    "longFormat": false
+                },
+                {
+                    "id": 4,
+                    "objectId": "sample_cases",
+                    "linkType": "INCOMING",
+                    "linkClass": "FORM",
+                    "linkFormat": 0,
+                    "linkObjectId": "sample_management_household_tracking",
+                    "fieldMap": [
+                        {
+                            "formField": "caseid",
+                            "datasetField": "id",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        },
+                        {
+                            "formField": "pub_to_users",
+                            "datasetField": "users",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        },
+                        {
+                            "formField": "counter",
+                            "datasetField": "num_visits",
+                            "updateLogicAction": "ADD_TO_NUMERIC_VALUE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        },
+                        {
+                            "formField": "starttime",
+                            "datasetField": "visit_datetimes",
+                            "updateLogicAction": "CONCATENATE_TO_TEXT",
+                            "updateLogicOptions": {
+                                "separator": "|",
+                                "position": "BEGINNING"
+                            }
+                        },
+                        {
+                            "formField": "new_reschedule",
+                            "datasetField": "reschedule",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": {
+                                "separator": null,
+                                "position": null
+                            }
+                        }
+                    ],
+                    "joiningField": "caseid",
+                    "relevanceField": "",
+                    "linkName": null,
+                    "publishError": null,
+                    "progressSummary": null,
+                    "publishingStatus": {
+                        "waitingPublishers": 0,
+                        "active": false
+                    },
+                    "containsManualPublishingConfiguration": true,
+                    "autoConfigured": false,
+                    "longFormat": false
+                }
+            ],
+            "attachedDatasetIds": [
+                "sample_cases",
+                "sample_enumerators"
+            ],
+            "lastIncomingDataDate": 1769610913000,
+            "groupId": 3,
+            "ordinal": 1.0,
+            "reviewWorkflowEnabled": false,
+            "reviewWorkflowConfig": {
+                "whichSubmissions": "ALL",
+                "useInitialQCResults": false,
+                "flagSubmissionSpecific": false,
+                "flagGroupSpecific": false,
+                "flagFieldSpecific": false,
+                "flagCriticalOnly": false,
+                "useRandomSelection": true,
+                "randomSamplePercent": 10.0,
+                "requireCommentsOnCorrections": false,
+                "allowRedoReview": false,
+                "allowApproveAll": false,
+                "encryptUserComments": true
+            },
+            "formFillingSettings": {
+                "allowNonLinearNavigation": true,
+                "allowGoToMenu": true,
+                "allowJumpToStart": true,
+                "allowJumpToEnd": true,
+                "allowSkipToNext": true,
+                "hyperlinkFieldReferences": true,
+                "locationWithinGroups": "ON",
+                "overrideDefaultWidth": false,
+                "allowUserSelectedWidth": false,
+                "startOverBehavior": "ONLY_LOGGED_IN",
+                "hideLoginOptions": true,
+                "disableSwipeNavigation": false,
+                "useLegacyUI": false
+            },
+            "advancedExportMode": false,
+            "advancedMonitorMode": false,
+            "exportWorkbookSummaries": [
+
+            ],
+            "monitorWorkbookSummaries": [
+
+            ],
+            "googleDriveSources": null,
+            "downloadable": true
+        },
+        {
+            "title": "Sample form - Locating households",
+            "id": "locating_households",
+            "version": "2309291833",
+            "creationDate": 1769581654000,
+            "createdUser": "uid:4794dd295f1283c1cfa4fb2eb1e18058|2026-01-14T11:18:01.805+0000",
+            "completeSubmissionCount": 0,
+            "incompleteSubmissionCount": 0,
+            "unreviewedSubmissionCount": 0,
+            "approvedSubmissionCount": 0,
+            "rejectedSubmissionCount": 0,
+            "formFields": null,
+            "testForm": false,
+            "encrypted": false,
+            "draftVersion": null,
+            "deployed": true,
+            "webDataCollectionAnonymousEnabled": false,
+            "webDataCollectionAppearance": "apprnc-default",
+            "webDataCollectionAutoDetectBrowserLanguage": true,
+            "qcCount": 0,
+            "datasetOptionsModel": {
+                "idColumn": "KEY",
+                "sendEmailOnQCWarnings": false,
+                "emailAddressesToReportQCWarnings": null,
+                "schedulingEnabled": false,
+                "sourceFilter": null,
+                "lastQCRunDate": null,
+                "idColumnSet": true
+            },
+            "dataLinkSummaries": [
+                {
+                    "id": 2,
+                    "objectId": "household_data",
+                    "linkType": "INCOMING",
+                    "linkClass": "FORM",
+                    "linkFormat": 0,
+                    "linkObjectId": "locating_households",
+                    "fieldMap": [
+                        {
+                            "formField": "hh_id",
+                            "datasetField": "hh_id_key",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": null
+                        },
+                        {
+                            "formField": "hh_address_updated",
+                            "datasetField": "hh_address",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": null
+                        },
+                        {
+                            "formField": "hh_name_updated",
+                            "datasetField": "hh_name",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": null
+                        },
+                        {
+                            "formField": "hh_phone_1_updated",
+                            "datasetField": "hh_phone_1",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": null
+                        },
+                        {
+                            "formField": "hh_phone_2_updated",
+                            "datasetField": "hh_phone_2",
+                            "updateLogicAction": "REPLACE",
+                            "updateLogicOptions": null
+                        }
+                    ],
+                    "joiningField": "hh_id",
+                    "relevanceField": "",
+                    "linkName": null,
+                    "publishError": null,
+                    "progressSummary": null,
+                    "publishingStatus": {
+                        "waitingPublishers": 0,
+                        "active": false
+                    },
+                    "containsManualPublishingConfiguration": true,
+                    "autoConfigured": false,
+                    "longFormat": false
+                }
+            ],
+            "attachedDatasetIds": [
+                "household_data"
+            ],
+            "lastIncomingDataDate": 0,
+            "groupId": 2,
+            "ordinal": 1.2,
+            "reviewWorkflowEnabled": false,
+            "reviewWorkflowConfig": {
+                "whichSubmissions": "ALL",
+                "useInitialQCResults": false,
+                "flagSubmissionSpecific": false,
+                "flagGroupSpecific": false,
+                "flagFieldSpecific": false,
+                "flagCriticalOnly": false,
+                "useRandomSelection": true,
+                "randomSamplePercent": 10.0,
+                "requireCommentsOnCorrections": false,
+                "allowRedoReview": false,
+                "allowApproveAll": false,
+                "encryptUserComments": true
+            },
+            "formFillingSettings": {
+                "allowNonLinearNavigation": true,
+                "allowGoToMenu": true,
+                "allowJumpToStart": true,
+                "allowJumpToEnd": true,
+                "allowSkipToNext": true,
+                "hyperlinkFieldReferences": true,
+                "locationWithinGroups": "ON",
+                "overrideDefaultWidth": false,
+                "allowUserSelectedWidth": false,
+                "startOverBehavior": "ONLY_LOGGED_IN",
+                "hideLoginOptions": true,
+                "disableSwipeNavigation": false,
+                "useLegacyUI": false
+            },
+            "advancedExportMode": false,
+            "advancedMonitorMode": false,
+            "exportWorkbookSummaries": [
+
+            ],
+            "monitorWorkbookSummaries": [
+
+            ],
+            "googleDriveSources": null,
+            "downloadable": true
+        },
+        {
+            "title": "Household Roster (by World Bank DIME)",
+            "id": "wbg_hh_roster",
+            "version": "2311150359",
+            "creationDate": 1769581790000,
+            "createdUser": "uid:4794dd295f1283c1cfa4fb2eb1e18058|2026-01-14T11:18:01.805+0000",
+            "completeSubmissionCount": 0,
+            "incompleteSubmissionCount": 0,
+            "unreviewedSubmissionCount": 0,
+            "approvedSubmissionCount": 0,
+            "rejectedSubmissionCount": 0,
+            "formFields": null,
+            "testForm": false,
+            "encrypted": false,
+            "draftVersion": null,
+            "deployed": true,
+            "webDataCollectionAnonymousEnabled": false,
+            "webDataCollectionAppearance": "apprnc-default",
+            "webDataCollectionAutoDetectBrowserLanguage": true,
+            "qcCount": 0,
+            "datasetOptionsModel": {
+                "idColumn": "KEY",
+                "sendEmailOnQCWarnings": false,
+                "emailAddressesToReportQCWarnings": null,
+                "schedulingEnabled": false,
+                "sourceFilter": null,
+                "lastQCRunDate": null,
+                "idColumnSet": true
+            },
+            "dataLinkSummaries": [
+                {
+                    "id": 5,
+                    "objectId": "wbg_hh_enumerators",
+                    "linkType": "INCOMING",
+                    "linkClass": "FORM",
+                    "linkFormat": 0,
+                    "linkObjectId": "wbg_hh_roster",
+                    "fieldMap": [
+
+                    ],
+                    "joiningField": null,
+                    "relevanceField": null,
+                    "linkName": null,
+                    "publishError": null,
+                    "progressSummary": null,
+                    "publishingStatus": {
+                        "waitingPublishers": 0,
+                        "active": false
+                    },
+                    "containsManualPublishingConfiguration": false,
+                    "autoConfigured": true,
+                    "longFormat": false
+                }
+            ],
+            "attachedDatasetIds": [
+                "wbg_hh_enumerators"
+            ],
+            "lastIncomingDataDate": 0,
+            "groupId": 2,
+            "ordinal": 1.3,
+            "reviewWorkflowEnabled": false,
+            "reviewWorkflowConfig": {
+                "whichSubmissions": "ALL",
+                "useInitialQCResults": false,
+                "flagSubmissionSpecific": false,
+                "flagGroupSpecific": false,
+                "flagFieldSpecific": false,
+                "flagCriticalOnly": false,
+                "useRandomSelection": true,
+                "randomSamplePercent": 10.0,
+                "requireCommentsOnCorrections": false,
+                "allowRedoReview": false,
+                "allowApproveAll": false,
+                "encryptUserComments": true
+            },
+            "formFillingSettings": {
+                "allowNonLinearNavigation": true,
+                "allowGoToMenu": true,
+                "allowJumpToStart": true,
+                "allowJumpToEnd": true,
+                "allowSkipToNext": true,
+                "hyperlinkFieldReferences": true,
+                "locationWithinGroups": "ON",
+                "overrideDefaultWidth": false,
+                "allowUserSelectedWidth": false,
+                "startOverBehavior": "ONLY_LOGGED_IN",
+                "hideLoginOptions": true,
+                "disableSwipeNavigation": false,
+                "useLegacyUI": false
+            },
+            "advancedExportMode": false,
+            "advancedMonitorMode": false,
+            "exportWorkbookSummaries": [
+
+            ],
+            "monitorWorkbookSummaries": [
+
+            ],
+            "googleDriveSources": null,
+            "downloadable": true
+        }
+    ]
+}

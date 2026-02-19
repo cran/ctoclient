@@ -1,0 +1,17 @@
+{
+    "id": "test",
+    "title": "Test",
+    "discriminator": "DATA",
+    "groupId": 1,
+    "allowOfflineUpdates": false,
+    "uniqueRecordField": null,
+    "fieldNames": "mpg,cyl,disp,hp,drat,wt,qsec,vs,am,gear,carb",
+    "casesManagementOptions": null,
+    "idFormatOptions": null,
+    "createdOn": "2026-01-27T06:39:12.000Z",
+    "modifiedOn": "2026-01-28T07:56:13.000Z",
+    "lastIncomingDataDate": null,
+    "totalRecords": 0,
+    "status": "READY",
+    "version": 6
+}

@@ -1,0 +1,21 @@
+province_id_key,province,district_id_key,district,ea_id_key,ea
+1,Province 1,1,District 1,1,Enumeration area 1
+1,Province 1,1,District 1,2,Enumeration area 2
+1,Province 1,1,District 1,3,Enumeration area 3
+1,Province 1,1,District 1,4,Enumeration area 4
+1,Province 1,1,District 1,5,Enumeration area 5
+1,Province 1,2,District 2,6,Enumeration area 6
+1,Province 1,2,District 2,7,Enumeration area 7
+1,Province 1,2,District 2,8,Enumeration area 8
+1,Province 1,2,District 2,9,Enumeration area 9
+1,Province 1,2,District 2,10,Enumeration area 10
+2,Province 2,3,District 3,11,Enumeration area 11
+2,Province 2,3,District 3,12,Enumeration area 12
+2,Province 2,3,District 3,13,Enumeration area 13
+2,Province 2,3,District 3,14,Enumeration area 14
+2,Province 2,3,District 3,15,Enumeration area 15
+2,Province 2,4,District 4,16,Enumeration area 16
+2,Province 2,4,District 4,17,Enumeration area 17
+2,Province 2,4,District 4,18,Enumeration area 18
+2,Province 2,4,District 4,19,Enumeration area 19
+2,Province 2,4,District 4,20,Enumeration area 20

@@ -1,0 +1,5 @@
+hh_id_key,hh_address,hh_name,hh_phone_1,hh_phone_2,hh_head_img,hh_house_img,hh_latitude,hh_longitude
+1,"102 Pleasant Place, Sunny Side",James,555-926-4956,555-343-5621,hh_head_1.png,house_1.jpg,-33.945597,18.469772
+2,"7 Summer Street, West End",Andy,555-314-6997,555-483-7532,hh_head_2.png,house_2.jpg,-33.927504,18.413229
+3,"52 Arnold Road, South Side",Juliet,555-391-6741,555-235-2452,hh_head_3.png,house_3.jpg,-33.879659,18.521816
+4,"3201 Industrial Way, Down Town",Bhavna,555-758-2794,555-758-2111,hh_head_4.png,house_4.jpg,-34.078258,18.452979

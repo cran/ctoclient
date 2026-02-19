@@ -1,0 +1,13 @@
+structure(list(method = "GET", url = "https:///temp_download/1771092146028/locating_households_printable.zip", 
+    status_code = 200L, headers = structure(list(date = "Sat, 14 Feb 2026 18:02:26 GMT", 
+        `content-type` = "application/octet-stream", `content-length` = "926638", 
+        server = "Apache", `strict-transport-security` = "max-age=63072000; includeSubDomains; preload", 
+        `content-disposition` = "inline;filename=\"locating_households_printable.zip\"", 
+        `accept-ranges` = "bytes", etag = "locating_households_printable.zip_926638_1771092146078", 
+        `last-modified` = "Sat, 14 Feb 2026 18:02:26 GMT", expires = "Sat, 21 Feb 2026 18:02:26 GMT", 
+        `content-range` = "bytes 0-926637/926638", `x-content-type-options` = "nosniff", 
+        `x-xss-protection` = "1; mode=block", `x-frame-options` = "SAMEORIGIN", 
+        `content-security-policy` = "frame-ancestors 'self' *.surveycto.com"), class = "httr2_headers"), 
+    body = as.raw(c(0x50, 0x4b, 0x03, 0x04, 0x14)), timing = c(redirect = 0, 
+    namelookup = 0, connect = 0, pretransfer = 0.000315, starttransfer = 1.804009, 
+    total = 82.05292), cache = new.env(parent = emptyenv())), class = "httr2_response")

@@ -1,0 +1,13 @@
+structure(list(method = "GET", url = "https:///temp_download/1771092228974/locating_households_template.docx", 
+    status_code = 200L, headers = structure(list(date = "Sat, 14 Feb 2026 18:03:50 GMT", 
+        `content-type` = "application/octet-stream", `content-length` = "8321", 
+        server = "Apache", `strict-transport-security` = "max-age=63072000; includeSubDomains; preload", 
+        `content-disposition` = "inline;filename=\"locating_households_template.docx\"", 
+        `accept-ranges` = "bytes", etag = "locating_households_template.docx_8321_1771092228970", 
+        `last-modified` = "Sat, 14 Feb 2026 18:03:48 GMT", expires = "Sat, 21 Feb 2026 18:03:50 GMT", 
+        `content-range` = "bytes 0-8320/8321", `x-content-type-options` = "nosniff", 
+        `x-xss-protection` = "1; mode=block", `x-frame-options` = "SAMEORIGIN", 
+        `content-security-policy` = "frame-ancestors 'self' *.surveycto.com"), class = "httr2_headers"), 
+    body = as.raw(c(0x50, 0x4b, 0x03, 0x04, 0x14)), timing = c(redirect = 0, 
+    namelookup = 0, connect = 0, pretransfer = 0.000634, starttransfer = 0.630829, 
+    total = 0.630974), cache = new.env(parent = emptyenv())), class = "httr2_response")

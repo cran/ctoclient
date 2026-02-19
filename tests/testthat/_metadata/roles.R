@@ -1,0 +1,12 @@
+structure(list(method = "GET", url = "https:///roles", status_code = 403L, 
+    headers = structure(list(date = "Sat, 14 Feb 2026 18:02:14 GMT", 
+        `content-type` = "application/json;charset=UTF-8", server = "Apache", 
+        `strict-transport-security` = "max-age=63072000; includeSubDomains; preload", 
+        `x-csrf-token` = "W0x80S612wNFAWu8M9GJ9MYnywjape4Q", 
+        `x-scto-enterprise-account-enabled` = "0", `x-scto-enterprise-account-ever-enabled` = "1", 
+        vary = "Accept-Encoding", `content-encoding` = "gzip", 
+        `x-content-type-options` = "nosniff", `x-xss-protection` = "1; mode=block", 
+        `x-frame-options` = "SAMEORIGIN", `content-security-policy` = "frame-ancestors 'self' *.surveycto.com"), class = "httr2_headers"), 
+    body = charToRaw("{\"error\":{\"code\":403,\"message\":\"Read access to Access Control APIs is disabled for your subscription. See https://www.surveycto.com/plans for details on the API access feature.\",\"responseObject\":null}}"), 
+    timing = c(redirect = 0, namelookup = 0, connect = 0, pretransfer = 0.000396, 
+    starttransfer = 0.297497, total = 0.581692), cache = new.env(parent = emptyenv())), class = "httr2_response")

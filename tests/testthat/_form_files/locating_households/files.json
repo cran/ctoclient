@@ -1,0 +1,94 @@
+{
+    "xForm": {
+        "formId": "locating_households",
+        "version": "2309291833",
+        "title": "Sample form - Locating households",
+        "creationDate": 1769581654000,
+        "creationUser": "uid:4794dd295f1283c1cfa4fb2eb1e18058|2026-01-14T11:18:01.805+0000",
+        "formFilename": "Form/Form definition - Locating households",
+        "encrypted": false,
+        "base64rsaPublicKey": null,
+        "submissionEnabled": true,
+        "downloadEnabled": true,
+        "xmlDefinitionHash": "md5:88f861c818d44f878e9994495a221ef5",
+        "xmlDefinition": null,
+        "formStatus": "READY",
+        "lastIncomingDataDate": 0,
+        "webDataCollectionAnonymousEnabled": false,
+        "webDataCollectionAppearance": "apprnc-default",
+        "webDataCollectionAutoDetectBrowserLanguage": true,
+        "webDataCollectionFormFillingSettings": {
+            "allowNonLinearNavigation": true,
+            "allowGoToMenu": true,
+            "allowJumpToStart": true,
+            "allowJumpToEnd": true,
+            "allowSkipToNext": true,
+            "hyperlinkFieldReferences": true,
+            "locationWithinGroups": "ON",
+            "overrideDefaultWidth": false,
+            "allowUserSelectedWidth": false,
+            "startOverBehavior": "ONLY_LOGGED_IN",
+            "hideLoginOptions": true,
+            "disableSwipeNavigation": false,
+            "useLegacyUI": false
+        },
+        "draftVersion": null,
+        "deployed": true,
+        "apiKey": null,
+        "groupId": 2,
+        "ordinal": 1.2,
+        "reviewWorkflowEnabled": false,
+        "reviewWorkflowConfig": null,
+        "advancedExportMode": false,
+        "advancedMonitorMode": false,
+        "googleDriveSources": null
+    },
+    "deployedGroupFiles": {
+        "definitionFile": {
+            "id": 0,
+            "formVersion": "2309291833",
+            "filename": "Form/Form definition - Locating households.xlsx",
+            "downloadLink": "https://sctopackagetest.surveycto.com/forms/locating_households/file-attachment/9/download?file=Form%25252FForm%252Bdefinition%252B-%252BLocating%252Bhouseholds.xlsx&as_attachment=true",
+            "dateStr": "Jan. 28, 2026 at 6:27AM",
+            "actor": "girjagutama@gmail.com"
+        },
+        "xmlDefinitionFile": {
+            "id": 0,
+            "formVersion": null,
+            "filename": null,
+            "downloadLink": "https://sctopackagetest.surveycto.com/forms/locating_households/xml?t=1771092231264",
+            "dateStr": "Jan. 28, 2026 at 6:27AM",
+            "actor": "girjagutama@gmail.com"
+        },
+        "mediaFiles": {
+            "household_data.csv": {
+                "id": 0,
+                "formVersion": null,
+                "filename": null,
+                "downloadLink": "/forms/locating_households/dataset-attachment/household_data/household_data.csv?as_attachment=true",
+                "dateStr": "Jan. 28, 2026 at 6:27AM",
+                "actor": "dataset (household_data)"
+            },
+            "images.zip": {
+                "id": 10,
+                "formVersion": null,
+                "filename": "images.zip",
+                "downloadLink": "https://sctopackagetest.surveycto.com/forms/locating_households/file-attachment/10/download?file=images.zip&as_attachment=true",
+                "dateStr": "Jan. 28, 2026 at 6:27AM",
+                "actor": "girjagutama@gmail.com"
+            },
+            "phone-call.fieldplugin.zip": {
+                "id": 11,
+                "formVersion": null,
+                "filename": "phone-call.fieldplugin.zip",
+                "downloadLink": "https://sctopackagetest.surveycto.com/forms/locating_households/file-attachment/11/download?file=phone-call.fieldplugin.zip&as_attachment=true",
+                "dateStr": "Jan. 28, 2026 at 6:27AM",
+                "actor": "girjagutama@gmail.com"
+            }
+        }
+    },
+    "draftGroupFiles": null,
+    "previousDefinitionFiles": [
+
+    ]
+}
