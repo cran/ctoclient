@@ -1,8 +1,8 @@
 Package: ctoclient
 Type: Package
 Title: A Modern and Flexible Data Pipeline for 'SurveyCTO'
-Version: 0.0.1
-Date: 2026-02-16
+Version: 0.1.0
+Date: 2026-03-28
 Authors@R: c(
     person(
       "Gutama Girja", "Urago",
@@ -32,9 +32,9 @@ URL: https://guturago.github.io/ctoclient/,
 BugReports: https://github.com/guturago/ctoclient/issues
 Depends: R (>= 4.1.0)
 NeedsCompilation: no
-Packaged: 2026-02-16 07:40:26 UTC; Gute
+Packaged: 2026-03-28 08:48:19 UTC; Gute
 Author: Gutama Girja Urago [aut, cre, cph] (ORCID:
     <https://orcid.org/0000-0001-5588-2301>)
 Maintainer: Gutama Girja Urago <girjagutama@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-02-19 19:50:13 UTC
+Date/Publication: 2026-03-28 09:20:02 UTC

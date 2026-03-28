@@ -1,7 +1,7 @@
-37d83556060d7531af96469163967e8f *DESCRIPTION
+4fbb6d87cabf82e4c0a4358f9a7a232e *DESCRIPTION
 5819c9dc2871a53ef5b82501cef525d9 *LICENSE
 8b225c807de98100ad4c0d1a8bc3bcb3 *NAMESPACE
-c42f04f74f85ead85e4ed38f8a74c8df *NEWS.md
+ee53499c63e85f9b0dae0e4bab58500f *NEWS.md
 fdcb091522db7cc239a541777c43727f *R/cto_connect.R
 2da91a285f655c330d286431ff15cd3a *R/cto_dataset_create.R
 0b142cc7385b021b0777d9bae26a2d40 *R/cto_dataset_delete.R
@@ -9,14 +9,14 @@ fdcb091522db7cc239a541777c43727f *R/cto_connect.R
 747850485f632404d796aa9962dd431c *R/cto_dataset_info.R
 f0ad23474a9c3ea6ee4dace1de7c7edd *R/cto_dataset_list.R
 30befcb7a3ae552bfc36108c42d7f43f *R/cto_form_attachment.R
-e45931a529718ad113632944ed4840ed *R/cto_form_data.R
+f273fb00135342190bb628a107c91455 *R/cto_form_data.R
 95c34b8b15d8c703b43a397dfc1ab4d1 *R/cto_form_data_attachment.R
 e8c00ea6270372567d6c37b584390423 *R/cto_form_definition.R
-595d78231e5ebb221f27dc252c7d26f4 *R/cto_form_dofile.R
+6245752c63e84f069a278b104a21e455 *R/cto_form_dofile.R
 debe01e297495a317c77965bad3cd0a1 *R/cto_form_files.R
 037038ee19174c62320b205bd35cac41 *R/cto_metadata.R
 1cd5ab9ab08747176bee6a17e4c1c0a3 *R/zzz.R
-de520897fc04a52b14dd743ede1f5a42 *README.md
+4b90b047d8f88af414fd112e2287ee18 *README.md
 60d6a8f912d8104123029ec7f6d17702 *inst/CITATION
 bf52145e1bb14725a0df22b5b9554038 *man/cto_connect.Rd
 982d2dde66c01008d25a3ead2f410b71 *man/cto_dataset_create.Rd

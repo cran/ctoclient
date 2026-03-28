@@ -149,7 +149,10 @@ cto_form_dofile <- function(form_id, path = NULL) {
         str_replace_all('"', "'") |>
         str_squish()
     ) |>
-    dplyr::filter(!is.na(.data$value))
+    dplyr::filter(
+      !is.na(.data$value),
+      !grepl("^\\$\\{.*\\}$", .data$label_clean)
+      )
 
   # Generate 'label define' commands for select_one
   choice_sets_s1 <- choices_all |>
@@ -242,7 +245,8 @@ cto_form_dofile <- function(form_id, path = NULL) {
         str_squish(),
 
       var_label = stringr::str_trunc(
-        stringr::str_remove(.data$cleaned_label, paste0(.data$name, "(\\W+)?")),
+        #stringr::str_remove(.data$cleaned_label, paste0(.data$name, "(\\W+)?")),
+        .data$cleaned_label,
         80
       ),
       var_note = .data$cleaned_label,
@@ -291,7 +295,12 @@ cto_form_dofile <- function(form_id, path = NULL) {
               stringr::fixed("*[0-9]+"),
               choices$value
             )
-            full_labels <- paste0(choices$label_clean, " - ", v)
+            full_labels <- ifelse(
+              !is.na(choices$label_clean) & choices$label_clean != "",
+              paste0(choices$label_clean, " - ", v),
+              v
+            )
+            #full_labels <- paste0(choices$label_clean, " - ", v)
             full_labels <- ifelse(
               nchar(full_labels) > 80,
               stringr::str_trunc(full_labels, 80),
@@ -406,6 +415,9 @@ cto_form_dofile <- function(form_id, path = NULL) {
     "",
     paste0("*", center_text(" THE END! ", "-"), "*")
   )
+
+  # Incase of missing value labels for binaries
+  #do_file_content <- sub('(") - ', '\\1', do_file_content)
 
   if (!is.null(path)) {
     writeLines(do_file_content, path)

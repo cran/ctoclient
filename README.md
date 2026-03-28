@@ -51,11 +51,11 @@ remotes::install_github("GutUrago/ctoclient")
 
 To avoid hard-coding credentials in your scripts, it is highly recommended to store your SurveyCTO server details in your .Renviron file.
 
-1. Run usethis::edit_r_environ() to open your environment file.
+1. Run `usethis::edit_r_environ()` to open your environment file.
 2. Add your credentials:
 
 ``` r
-SERVER="myorganization.surveycto.com"
+SERVER="myorg"
 USER="myemail@example.com"
 PASS="mypassword"
 ```
@@ -149,7 +149,7 @@ cto_form_languages("myform")
 cto_form_printable("myform")
 
 # Get a mail-merge template of the form
-cto_form_mail_template
+cto_form_mail_template("myform")
 ```
 
 
