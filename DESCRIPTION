@@ -1,8 +1,8 @@
 Package: ctoclient
 Type: Package
 Title: A Modern and Flexible Data Pipeline for 'SurveyCTO'
-Version: 0.1.0
-Date: 2026-03-28
+Version: 0.2.0
+Date: 2026-09-20
 Authors@R: c(
     person(
       "Gutama Girja", "Urago",
@@ -22,19 +22,20 @@ Description: A modern and flexible R client for the 'SurveyCTO', a mobile and
 License: MIT + file LICENSE
 Language: en-US
 Encoding: UTF-8
-RoxygenNote: 7.3.3
-Imports: checkmate, cli, dplyr, httr2, purrr, readr, readxl, rlang,
-        stringr, tidyr
-Suggests: curl, httptest2, jsonlite, testthat (>= 3.0.0)
+Imports: checkmate, cli, curl, dplyr, flextable, httr2 (>= 1.2.0),
+        jsonlite, officer, purrr, readr, readxl, rlang, stringr, tidyr
+Suggests: httptest2, knitr, rmarkdown, testthat (>= 3.0.0)
 Config/testthat/edition: 3
 URL: https://guturago.github.io/ctoclient/,
         https://github.com/guturago/ctoclient/
 BugReports: https://github.com/guturago/ctoclient/issues
 Depends: R (>= 4.1.0)
+VignetteBuilder: knitr
+Config/roxygen2/version: 8.1.0
 NeedsCompilation: no
-Packaged: 2026-03-28 08:48:19 UTC; Gute
+Packaged: 2026-09-20 12:26:04 UTC; Gute
 Author: Gutama Girja Urago [aut, cre, cph] (ORCID:
     <https://orcid.org/0000-0001-5588-2301>)
 Maintainer: Gutama Girja Urago <girjagutama@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-03-28 09:20:02 UTC
+Date/Publication: 2026-09-20 12:40:02 UTC

@@ -82,6 +82,7 @@ cto_dataset_create <- function(
   session <- get_session()
 
   assert_string(id)
+  assert_url_safe(id, "id")
   assert_string(title)
   assert_string(unique_record_field, null.ok = TRUE)
   assert_flag(allow_offline_updates, null.ok = TRUE)
@@ -123,6 +124,8 @@ cto_dataset_upload <- function(
   joining_field = NULL
 ) {
   session <- get_session()
+  assert_string(id)
+  assert_url_safe(id, "id")
   checkmate::assert_file_exists(file, 'r', "csv")
   assert_string(joining_field, null.ok = TRUE)
 

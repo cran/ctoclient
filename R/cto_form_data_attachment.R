@@ -26,6 +26,7 @@
 #'   of downloading files to the local disk.
 #'
 #' @family Form Management Functions
+#' @export
 #'
 #' @examples
 #' \dontrun{
@@ -55,11 +56,13 @@ cto_form_data_attachment <- function(
   assert_flag(overwrite)
   session <- get_session()
 
-  rgx <- "^https://.*\\.surveycto\\.com/api/v2/forms/.*/submissions/uuid:.*/attachments/.*\\.*$"
+  # `[^/]` keeps each part within a single path segment, so a host such as
+  # "attacker.example/x.surveycto.com" can no longer satisfy the pattern.
+  rgx <- "^https://[^/]*\\.surveycto\\.com/api/v2/forms/[^/]*/submissions/uuid:[^/]*/attachments/[^/]*$"
 
   df <- cto_form_data(form_id, private_key = private_key, tidy = FALSE)
 
-  if (length(df) == 0) {
+  if (NROW(df) == 0) {
     cli_warn("There is no submission for {col_blue(form_id)} form.")
     return(invisible())
   }

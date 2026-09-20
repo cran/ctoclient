@@ -1,159 +1,105 @@
 
-# ctoclient: A Modern and Flexible Data Pipeline for 'SurveyCTO'
+# ctoclient: A Modern and Flexible Data Pipeline for 'SurveyCTO' <img src="man/figures/logo.png" align="right" height="139" alt="ctoclient logo" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/GutUrago/ctoclient/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/GutUrago/ctoclient/actions/workflows/R-CMD-check.yaml)
+[![CRAN status](https://www.r-pkg.org/badges/version/ctoclient)](https://cran.r-project.org/package=ctoclient) 
+[![cran checks](https://badges.cranchecks.info/worst/ctoclient.svg)](https://cran.r-project.org/web/checks/check_results_ctoclient.html)
+[![Codecov test coverage](https://codecov.io/gh/guturago/ctoclient/graph/badge.svg)](https://app.codecov.io/gh/guturago/ctoclient)
+[![minimal R version](https://img.shields.io/badge/R%3E%3D-4.1.0-6666ff.svg)](https://cran.r-project.org/)
 [![DOI](https://zenodo.org/badge/1121002963.svg)](https://doi.org/10.5281/zenodo.18107568)
 <!-- badges: end -->
 
+**`ctoclient`** is a modern, fast, and flexible high-level R client for the 
+[SurveyCTO REST API](https://developer.surveycto.com/). 
+Built on top of the robust [httr2](https://httr2.r-lib.org/) framework, it provides a consistent and pipe-friendly 
+interface for programmatic access to server resources.
 
-A modern and flexible R client for the [SurveyCTO REST API](https://developer.surveycto.com/), 
-a mobile and offline data collection platform, providing a modern and consistent interface for 
-programmatic access to server resources. Built on top of the [httr2 package](https://httr2.r-lib.org/), 
-it enables secure and efficient data retrieval and returns analysis-ready 
-data through optional tidying. It includes functions to create, upload, and 
-download server datasets, in addition to fetching form data, files, and 
-submission attachments. Robust authentication and request handling make the 
-package suitable for automated survey monitoring and downstream analysis.
+## Why use `ctoclient`?
 
-
-This package is built with robustness and efficiency in mind, aiming to streamline 
-the workflow for researchers and data analysts who rely on SurveyCTO. By automating 
-the retrieval of data, attachments, and server metadata, `ctoclient` allows you to 
-focus on analysis rather than manual data management. Whether you are running daily 
-monitoring dashboards or final impact evaluations, this tool ensures your data 
-pipeline is reproducible and reliable.
-
-We welcome contributions from the community! If you encounter a bug, have a 
-feature request, or want to improve the documentation, please feel free to open 
-an issue or submit a pull request.
+* **Analysis Ready:** Automatically tidies messy API responses into clean data frames.
+* **Encrypted Data Support:** Seamlessly handle encrypted forms with private keys.
+* **Full Resource Coverage:** Manage forms, server datasets, attachments, and metadata.
+* **Modern Auth:** Robust session handling and secure credential management.
+* **Extendable:** Built on `httr2` request objects, allowing for easy customization and extension of API requests.
+* **Stata Integration:** Built-in tools for generating `.do` files and templates for legacy pipelines.
 
 ## Installation
 
-You can install the stable version of ctoclient:
+Install the stable version from CRAN:
 
-```r
+``` r
 install.packages("ctoclient")
 ```
-or development version:
+
+Or get the development version with the latest features:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("GutUrago/ctoclient")
-
-# or 
-
-# install.packages("remotes")
-remotes::install_github("GutUrago/ctoclient")
+# install.packages("pak")
+pak::pak("GutUrago/ctoclient")
 ```
 
-## Setup & Authentication
+## Quick start
 
-To avoid hard-coding credentials in your scripts, it is highly recommended to store your SurveyCTO server details in your .Renviron file.
-
-1. Run `usethis::edit_r_environ()` to open your environment file.
-2. Add your credentials:
-
-``` r
-SERVER="myorg"
-USER="myemail@example.com"
-PASS="mypassword"
-```
-3. Restart R.
-
-## Usage
-
-### 1. Connect to the Server
+Connect once, then work. Every function picks up the active session on its
+own, so there is no connection object to pass around.
 
 ``` r
 library(ctoclient)
 
-# Connect using environment variables (recommended)
-cto_connect(
-  server    = Sys.getenv("SERVER"),
-  user      = Sys.getenv("USER"),
-  password  = Sys.getenv("PASS")
-)
+# Leave the password out and you are prompted for it securely
+cto_connect(server = "myorg", username = "admin@example.com")
 
-# Verify connection
-if (cto_is_connected()) {
-  message("Successfully connected to SurveyCTO!")
-}
+# What is on the server?
+cto_form_ids()
+
+# Download and tidy submissions
+data <- cto_form_data("baseline_survey")
+
+# Download the photos respondents submitted
+cto_form_data_attachment("baseline_survey", fields = ends_with("_img"))
+
+# Label a Stata export, and generate a Word copy of the form for review
+cto_form_dofile("baseline_survey", path = "baseline_labels.do")
+cto_form_docx("baseline_survey", path = "baseline_review.docx")
 ```
 
-### 2. Working with Forms and Data
+`cto_form_data()` does real work on your behalf: it types numeric, date and
+datetime fields from the form definition, drops structural rows, splits
+geopoints into `_lat`/`_long`/`_alt`/`_acc`, strips URLs from media columns,
+and fills in the `select_multiple` binary columns that the export omits when
+nobody picked an option. Pass `tidy = FALSE` to get the server's raw export
+instead.
 
-Download form definitions, raw data, and attachments. Export functions with cto_*
+## Documentation
 
-``` r
-# List all available forms
-forms <- cto_form_ids()
+* [Managing connections](https://guturago.github.io/ctoclient/articles/managing-connections.html) — credentials, sessions, multiple servers
+* [Working with form data](https://guturago.github.io/ctoclient/articles/form-data.html) — what tidying does, field by field
+* [Documenting and reviewing a form](https://guturago.github.io/ctoclient/articles/form-documentation.html) — Stata do-files, Word review documents, printable versions
+* [Attachments and media](https://guturago.github.io/ctoclient/articles/attachments.html) — form media and submission files
+* [Managing server datasets](https://guturago.github.io/ctoclient/articles/server-datasets.html) — the upload modes, and how not to lose data
+* [Automating a pipeline](https://guturago.github.io/ctoclient/articles/automation.html) — CI, scheduling, incremental pulls
 
-# Get metadata form for specific form
-cto_form_metadata('myform')
+The [function reference](https://guturago.github.io/ctoclient/reference/index.html)
+lists everything the package exports, grouped by task.
 
-# Download data for a specific form
-data <- cto_form_data("myform")
+## Security
 
-# Download form submission medias
-cto_form_data_attachment('myform', ends_with('_img'), "mykey")
+Never hard-code passwords in a script. Store them in `.Renviron`
+(`usethis::edit_r_environ()`) and read them with `Sys.getenv()`, or keep them
+in your system credential store with the
+[keyring](https://keyring.r-lib.org/) package. See
+[Managing connections](https://guturago.github.io/ctoclient/articles/managing-connections.html)
+for the details.
 
-# Download the default form import do-file
-cto_form_stata_template('myform')
+## Contributing
 
-# Build custom Stata import do-file
-cto_form_dofile('myform', "form.do")
-
-# Download attachments (e.g., photos, audio)
-cto_form_attachment("myform", dir = "data/attachments", overwrite = TRUE)
-
-```
-
-### 3. Server Datasets
-
-Manage server-side datasets.
-
-```r
-# List existing datasets
-datasets <- cto_dataset_list()
-
-# Create server dataset
-cto_dataset_create("mydata")
-
-# Upload a local CSV to a server dataset
-cto_dataset_upload("mydata", "data/mydata.csv")
-
-# Download a server dataset to a local file
-cto_dataset_download(dir = "data/downloads", overwrite = TRUE)
-
-# Purge server dataset
-cto_dataset_purge("mydata")
-
-# Delete server dataset
-cto_dataset_delete("mydata")
-```
-
-
-### 4. Utilities and Metadata
-
-Retrieve server configuration and helper files.
-
-```r
-# Get server metadata
-meta <- cto_metadata()
-
-# Generate a Stata template for a form
-cto_form_languages("myform")
-
-# Get a printable version of the form
-cto_form_printable("myform")
-
-# Get a mail-merge template of the form
-cto_form_mail_template("myform")
-```
-
+We welcome contributions! If you encounter a bug or have a feature request, 
+please [open an issue](https://github.com/GutUrago/ctoclient/issues). 
+Pull requests should include updated tests and documentation.
 
 ## Disclaimer
+
 This package is an independent, open-source project. It is not affiliated with, 
 endorsed by, or maintained by SurveyCTO or Dobility, Inc. Use it at your own risk, 
 and always ensure you handle survey credentials and participant data securely.

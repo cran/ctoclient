@@ -101,7 +101,9 @@ cto_form_attachment <- function(
     ))
   }
 
-  paths_all <- file.path(dir, files)
+  # `files` are names supplied by the server, so keep them for the lookup below
+  # but never let one of them escape `dir`.
+  paths_all <- file.path(dir, basename(files))
   to_download <- if (overwrite) {
     rep(TRUE, length(files))
   } else {
@@ -111,7 +113,7 @@ cto_form_attachment <- function(
   urls_to_fetch <- urls[to_download]
   paths_to_fetch <- paths_all[to_download]
 
-  if (any(i <- grepl("^/forms", urls_to_fetch))) {
+  if (any(i <- grepl("^/", urls_to_fetch))) {
     urls_to_fetch[i] <- paste0(httr2::req_get_url(session), urls_to_fetch[i])
   }
 

@@ -18,6 +18,7 @@
 cto_dataset_info <- function(id) {
   session <- get_session()
   assert_string(id)
+  assert_url_safe(id, "id")
 
   if (get_verbose()) {
     cli_progress_step(

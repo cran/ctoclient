@@ -43,6 +43,7 @@
 #'   invisibly.
 #'
 #' @family Form Management Functions
+#' @export
 #'
 #' @examples
 #' \dontrun{

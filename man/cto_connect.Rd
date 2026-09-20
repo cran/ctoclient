@@ -83,5 +83,5 @@ cto_set_connection(con)
 }
 }
 \seealso{
-\code{\link[httr2:req_auth_basic]{httr2::req_auth_basic()}}, \code{\link[usethis:edit]{usethis::edit_r_environ()}}
+\code{\link[httr2:req_auth_basic]{httr2::req_auth_basic()}}, \code{\link[usethis:edit_r_environ]{usethis::edit_r_environ()}}
 }

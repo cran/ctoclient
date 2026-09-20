@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Working with Form Data</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Working with Form Data</h1>
+
+
+
+<p><code>cto_form_data()</code> does two things. It downloads
+submissions, and then — unless you tell it not to — it reshapes them
+into something you can analyse. The second half is where most of the
+package’s value is, and also where most of the surprises are, so this
+article walks through exactly what it does.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(ctoclient)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">cto_connect</span>(<span class="st">&quot;myorg&quot;</span>, <span class="st">&quot;admin@example.com&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">cto_form_data</span>(<span class="st">&quot;baseline_survey&quot;</span>)</span></code></pre></div>
+<div id="choosing-what-to-download" class="section level2">
+<h2>1. Choosing what to download</h2>
+<p>Four arguments control the request itself.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">cto_form_data</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="at">form_id     =</span> <span class="st">&quot;baseline_survey&quot;</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="at">private_key =</span> <span class="st">&quot;keys/baseline.pem&quot;</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  <span class="at">start_date  =</span> <span class="fu">as.POSIXct</span>(<span class="st">&quot;2026-01-01&quot;</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>  <span class="at">status      =</span> <span class="fu">c</span>(<span class="st">&quot;approved&quot;</span>, <span class="st">&quot;pending&quot;</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  <span class="at">tidy        =</span> <span class="cn">TRUE</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>)</span></code></pre></div>
+<p><strong><code>start_date</code></strong> asks the server for
+submissions received after a timestamp, so it is a genuine reduction in
+what crosses the network, not a filter applied afterwards. It must be a
+<code>POSIXct</code>; the default reaches back to 2000. This is the
+argument that makes incremental pulls cheap — see <a href="https://guturago.github.io/ctoclient/articles/automation.html">Automating
+a pipeline</a>.</p>
+<p><strong><code>status</code></strong> takes any combination of
+<code>&quot;approved&quot;</code>, <code>&quot;rejected&quot;</code> and
+<code>&quot;pending&quot;</code>. All three are included by default, which is
+worth knowing: if your team uses the review workflow, the data you get
+back contains rejected submissions unless you say otherwise.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>approved <span class="ot">&lt;-</span> <span class="fu">cto_form_data</span>(<span class="st">&quot;baseline_survey&quot;</span>, <span class="at">status =</span> <span class="st">&quot;approved&quot;</span>)</span></code></pre></div>
+<p><strong><code>private_key</code></strong> is the path to a
+<code>.pem</code> file, required only for encrypted forms. The key is
+sent with the request and never stored.</p>
+<p><strong><code>tidy</code></strong> is covered below.</p>
+<p>If the form has no submissions matching the request, you get a
+warning and an empty result rather than an error.</p>
+</div>
+<div id="what-tidy-false-gives-you" class="section level2">
+<h2>2. What <code>tidy = FALSE</code> gives you</h2>
+<p><code>tidy = FALSE</code> returns the parsed JSON exactly as
+SurveyCTO’s wide export provides it. Every column is character, dates
+are American-format strings, geopoints are single space-separated
+strings, media fields are full URLs, and every structural row in your
+form — notes, group markers — is present as a column.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>raw <span class="ot">&lt;-</span> <span class="fu">cto_form_data</span>(<span class="st">&quot;baseline_survey&quot;</span>, <span class="at">tidy =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p>Use it when you want the server’s output verbatim: to archive it, to
+compare against a colleague’s Stata pipeline, or to debug something the
+tidying step got wrong. Note that <code>tidy = FALSE</code> also skips
+the form-definition download, so it is the faster of the two and the
+only one that works without the form definition being available.</p>
+</div>
+<div id="what-tidying-actually-does" class="section level2">
+<h2>3. What tidying actually does</h2>
+<p>With <code>tidy = TRUE</code>, <code>cto_form_data()</code> downloads
+the form’s XLSForm definition and uses it to decide what each column is.
+The steps run in this order.</p>
+<div id="missing-select_multiple-columns-are-added" class="section level3">
+<h3>Missing <code>select_multiple</code> columns are added</h3>
+<p>SurveyCTO’s wide export creates one binary column per choice, named
+<code>question_value</code> — but only for choices somebody actually
+picked. A choice no respondent selected produces no column at all, which
+means the shape of your data depends on your respondents.</p>
+<p><code>ctoclient</code> reads the choice list from the form definition
+and adds the missing columns, so <code>crops_1</code> through
+<code>crops_5</code> all exist whether or not anyone grew crop 4.</p>
+<p>One deliberate exception: a choice whose value is not a whole number
+is skipped, because the export could never have produced a column for
+it.</p>
+</div>
+<div id="structural-fields-are-dropped" class="section level3">
+<h3>Structural fields are dropped</h3>
+<p>Notes, <code>begin group</code>, <code>end group</code> and
+<code>end repeat</code> rows carry no data, so their columns go.
+<code>begin repeat</code> is kept, because the export turns it into a
+<code>&lt;name&gt;_count</code> column telling you how many times the
+group repeated.</p>
+</div>
+<div id="columns-are-reordered" class="section level3">
+<h3>Columns are reordered</h3>
+<p><code>CompletionDate</code> and <code>SubmissionDate</code> come
+first, then your questions in the order the form asks them, then
+anything left over. For <code>select_multiple</code> questions the
+binary columns are sorted by choice value, with the
+<code>other</code>-style columns last.</p>
+</div>
+<div id="unselected-options-are-filled-with-zero-conditionally" class="section level3">
+<h3>Unselected options are filled with zero — conditionally</h3>
+<p>This is the subtlest step. For each <code>select_multiple</code>
+question, a row that selected <em>at least one</em> option has its
+remaining binaries set to <code>0</code>. A row that selected
+<em>nothing at all</em> keeps <code>NA</code> across every binary for
+that question.</p>
+<p>That distinction is deliberate and it matters: it separates “this
+household grows no crops” from “we never asked this household about
+crops”, which is what you want when the question sat behind a relevance
+condition. If you would rather have zeros everywhere, do it yourself
+afterwards.</p>
+</div>
+<div id="types-are-converted" class="section level3">
+<h3>Types are converted</h3>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Form type</th>
+<th>Becomes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>datetime</code>, <code>start</code>, <code>end</code>, plus
+<code>CompletionDate</code> and <code>SubmissionDate</code></td>
+<td><code>POSIXct</code></td>
+</tr>
+<tr class="even">
+<td><code>date</code>, <code>today</code></td>
+<td><code>Date</code></td>
+</tr>
+<tr class="odd">
+<td><code>select_one</code>, <code>integer</code>, <code>decimal</code>,
+<code>sensor_*</code></td>
+<td>numeric</td>
+</tr>
+<tr class="even">
+<td><code>image</code>, <code>audio</code>, <code>video</code>,
+<code>file</code>, audits</td>
+<td>character, URL stripped to the filename</td>
+</tr>
+<tr class="odd">
+<td><code>geopoint</code></td>
+<td>split into four numeric columns, see below</td>
+</tr>
+</tbody>
+</table>
+<p>Anything still character afterwards goes through
+<code>readr::parse_guess()</code>, which is what turns <code>text</code>
+questions holding only numbers into numeric columns. If you have an ID
+field of digits that must stay character — a phone number with a leading
+zero, say — check it, because this step will have converted it.</p>
+</div>
+<div id="geopoints-are-split" class="section level3">
+<h3>Geopoints are split</h3>
+<p>A <code>geopoint</code> column arrives as
+<code>&quot;9.03 38.74 2355 4.9&quot;</code>. It is split into four numeric
+columns with <code>_lat</code>, <code>_long</code>, <code>_alt</code>
+and <code>_acc</code> suffixes:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">names</span>(data)[<span class="fu">grepl</span>(<span class="st">&quot;^gps&quot;</span>, <span class="fu">names</span>(data))]</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;gps&quot;      &quot;gps_lat&quot;  &quot;gps_long&quot; &quot;gps_alt&quot;  &quot;gps_acc&quot;</span></span></code></pre></div>
+<p>The original column is kept under its own name. If you need the raw
+point — to hand to another tool, or to check a split that looks wrong —
+it is still there.</p>
+</div>
+</div>
+<div id="repeat-groups" class="section level2">
+<h2>4. Repeat groups</h2>
+<p>A repeat group is exported wide: a question <code>plot_size</code>
+inside a repeat becomes <code>plot_size_1</code>,
+<code>plot_size_2</code> and so on, one per iteration, plus a
+<code>&lt;repeat_name&gt;_count</code> column. Nesting adds another
+index, so a question two repeats deep becomes
+<code>field_1_2</code>.</p>
+<p><code>ctoclient</code> types and orders all of these correctly, but
+it does not reshape them into long form, because only you know which
+shape you want. <code>tidyr</code> does the rest:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>plots <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>    <span class="at">cols =</span> <span class="fu">matches</span>(<span class="st">&quot;^plot_(size|id)_[0-9]+$&quot;</span>),</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="fu">c</span>(<span class="st">&quot;.value&quot;</span>, <span class="st">&quot;plot_number&quot;</span>),</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>    <span class="at">names_pattern =</span> <span class="st">&quot;^(plot_(?:size|id))_([0-9]+)$&quot;</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>  <span class="fu">drop_na</span>(plot_id)</span></code></pre></div>
+</div>
+<div id="when-tidying-goes-wrong" class="section level2">
+<h2>5. When tidying goes wrong</h2>
+<p>Each tidying step is wrapped individually. If one fails — an
+unexpected type, a malformed geopoint, a form definition that will not
+parse — the function prints a message naming the step and carries on
+with the remaining steps.</p>
+<p>The practical consequence is that a partial failure returns data
+rather than an error, so a message like</p>
+<pre><code>Failed to parse date columns: ...</code></pre>
+<p>means the result is real data with one step skipped, not a failed
+download. In an unattended job, that message is the thing to watch for.
+If you would rather see the raw export in that situation, re-run with
+<code>tidy = FALSE</code> and compare.</p>
+</div>
+<div id="a-note-on-running-it-twice" class="section level2">
+<h2>6. A note on running it twice</h2>
+<p><code>cto_form_data()</code> is not idempotent over its own output:
+it expects the server’s raw export, not an already-tidied data frame.
+Always tidy a fresh download rather than passing a tidied frame back
+through anything that assumes raw input.</p>
+</div>
+<div id="see-also" class="section level2">
+<h2>See also</h2>
+<ul>
+<li><a href="https://guturago.github.io/ctoclient/articles/attachments.html">Attachments
+and media</a> to download the files these columns name.</li>
+<li><a href="https://guturago.github.io/ctoclient/articles/form-documentation.html">Documenting
+and reviewing a form</a> to see the definition that drives all of the
+above.</li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

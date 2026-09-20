@@ -33,9 +33,18 @@
 #'   \item **Media fields:** Strips URLs from image, audio, and video fields,
 #'   leaving only the filename.
 #'   \item **Geopoints:** Splits geopoint variables into four columns with
-#'   `_latitude`, `_longitude`, `_altitude`, and `_accuracy` suffixes when
-#'   not already present.
+#'   `_lat`, `_long`, `_alt`, and `_acc` suffixes. The original column is
+#'   kept under its own name.
+#'   \item **Select multiple:** Adds the binary columns that the export omits
+#'   when no respondent picked an option, and fills unselected options with
+#'   `0` for rows that selected at least one. A row that selected nothing
+#'   keeps `NA`, so "asked and answered none" stays distinct from
+#'   "never asked".
 #' }
+#'
+#' Each step is applied independently: if one fails, a message naming the
+#' step is printed and the remaining steps still run, so a partial failure
+#' returns data rather than an error.
 #'
 #' @return
 #' A `data.frame` containing the downloaded submissions.
@@ -105,12 +114,14 @@ cto_form_data <- function(
   }
   raw_data <- fetch_api_response(session, url_path)
 
-  if (length(raw_data) == 0) {
+  if (NROW(raw_data) == 0) {
     cli_warn("No submissions were found for {col_blue(form_id)} form")
     return(raw_data)
   }
 
-  if (!tidy) return(raw_data)
+  if (!tidy) {
+    return(raw_data)
+  }
 
   if (verbose) {
     cli_progress_step(
@@ -122,290 +133,348 @@ cto_form_data <- function(
   # Process the data
   tidy_data <- raw_data
 
-  fp <- tryCatch({
-    cto_form_definition(form_id, dir = tempdir(), overwrite = TRUE)
-  },
-  error = function(e) {
-    message(paste("Failed to download XLSForm:", conditionMessage(e)))
-  })
+  fp <- tryCatch(
+    {
+      cto_form_definition(form_id, dir = tempdir(), overwrite = TRUE)
+    },
+    error = function(e) {
+      message(paste("Failed to download XLSForm:", conditionMessage(e)))
+    }
+  )
 
-  survey <- tryCatch({
-    readxl::read_excel(fp, sheet = "survey") |>
-      mutate(
-        type = str_squish(.data$type),
-        name = str_squish(.data$name),
-        repeat_level = purrr::accumulate(
-          .data$type,
-          .init = 0,
-          .f = function(i, x) {
-            if (grepl("begin repeat", x, TRUE)) {
-              i + 1
-            } else if (grepl("end repeat", x, TRUE)) {
-              i - 1
-            } else {
-              i
+  survey <- tryCatch(
+    {
+      readxl::read_excel(fp, sheet = "survey") |>
+        mutate(
+          type = str_squish(.data$type),
+          name = str_squish(.data$name),
+          repeat_level = purrr::accumulate(
+            .data$type,
+            .init = 0,
+            .f = function(i, x) {
+              if (grepl("begin repeat", x, TRUE)) {
+                i + 1
+              } else if (grepl("end repeat", x, TRUE)) {
+                i - 1
+              } else {
+                i
+              }
             }
-          }
-        )[-1],
-        is_repeat = .data$repeat_level > 0,
-        is_gps = grepl("^geopoint", .data$type, TRUE),
-        is_numeric = grepl(
-          "^select_one|^integer|^decimal|^sensor_",
-          .data$type,
-          TRUE
-        ),
-        is_slt_multi = grepl("^select_multiple", .data$type, TRUE),
-        is_date = grepl("^date|^today", .data$type, TRUE),
-        is_datetime = grepl("^datetime|^start|^end$", .data$type, TRUE),
-        is_null_fields = grepl(
-          "^note|^begin group|^end group|^end repeat",
-          .data$type,
-          TRUE
-        ),
-        is_media = grepl(
-          "^image$|^audio$|^video$|^file|^text audit|^audio audit",
-          .data$type,
-          TRUE
-        ),
-        regex_varname = purrr::pmap_chr(
-          list(.data$name, .data$repeat_level, .data$is_slt_multi),
-          \(n, r, m) gen_regex_varname(n, r, m)
-        ),
-        regex_varname = ifelse(
-          grepl("^begin repeat", .data$type, TRUE),
-          stringr::str_replace(.data$regex_varname, r"(\[0-9\]\+\$)", "count"),
-          .data$regex_varname
-        ),
-        multi_select = ifelse(
-          # For now handling only non-repeat fields
-          .data$is_slt_multi & .data$repeat_level == 0,
-          purrr::pmap_chr(
-            list(.data$name, .data$repeat_level, .data$is_slt_multi, "_values"),
-            \(n, r, m, mp) gen_regex_varname(n, r, m, mp)
-          ), NA)
-      )
-  },
-  error = function(e) {
-    message(paste("Failed to parse XLSForm:", conditionMessage(e)))
-  })
-
-  tryCatch({
-    cs_dates <- c("CompletionDate", "SubmissionDate")
-    all_fields <- survey$regex_varname[!survey$is_null_fields]
-    null_fields <- survey$regex_varname[survey$is_null_fields]
-    numeric_fields <- survey$regex_varname[survey$is_numeric]
-    multi_field <- survey$regex_varname[survey$is_slt_multi]
-    date_fields <- survey$regex_varname[survey$is_date]
-    datetime_fields <- c(cs_dates, survey$regex_varname[survey$is_datetime])
-    media_fields <- survey$regex_varname[survey$is_media]
-    gps_fields <- survey$regex_varname[survey$is_gps]
-  }, error = function(e) {
-    message(paste("Failed to categorize fields:", conditionMessage(e)))
-  })
-
-  multi_choices <- tryCatch({
-    readxl::read_excel(fp, sheet = "choices") |>
-      mutate(value = suppressWarnings(as.numeric(.data$value))) |>
-      dplyr::filter(!is.na(.data$value)) |>
-      mutate(value = str_replace_all(.data$value, "-", "_")) |>
-      select("list_name", "value") |>
-      dplyr::right_join(
-        survey |>
-          dplyr::filter(!is.na(.data$multi_select)) |>
-          mutate(list_name = str_extract(.data$type, "\\S+$")) |>
-          select("name", "list_name", "multi_select"),
-        by = "list_name", relationship = "many-to-many") |>
-      mutate(var_name = str_glue("{name}_{value}")) |>
-      select("name", "var_name") |>
-      tidyr::nest(.by = "name") |>
-      purrr::pluck("data")
-  }, error = function(e) {
-    message(paste("Failed to prepare missing binary variables:", conditionMessage(e)))
-  })
-
-  tidy_data <- tryCatch({
-    purrr::reduce(
-      multi_choices,
-      function(df, fields_tbl) {
-        fields <- fields_tbl$var_name
-        add_vars <- setdiff(fields, names(df))
-        if (length(add_vars) == 0) return(df)
-        new_cols <- purrr::set_names(
-          replicate(length(add_vars), rep(NA, nrow(df)), simplify = FALSE),
-          add_vars
+          )[-1],
+          is_repeat = .data$repeat_level > 0,
+          is_gps = grepl("^geopoint", .data$type, TRUE),
+          is_numeric = grepl(
+            "^select_one|^integer|^decimal|^sensor_",
+            .data$type,
+            TRUE
+          ),
+          is_slt_multi = grepl("^select_multiple", .data$type, TRUE),
+          is_date = grepl("^date$|^today$", .data$type, TRUE),
+          is_datetime = grepl("^datetime$|^start$|^end$", .data$type, TRUE),
+          is_null_fields = grepl(
+            "^note|^begin[ _]group|^end[ _]group|^end[ _]repeat",
+            .data$type,
+            TRUE
+          ),
+          is_media = grepl(
+            "^image$|^audio$|^video$|^file|^text audit|^audio audit",
+            .data$type,
+            TRUE
+          ),
+          regex_varname = purrr::pmap_chr(
+            list(.data$name, .data$repeat_level, .data$is_slt_multi),
+            \(n, r, m) gen_regex_varname(n, r, m)
+          ),
+          regex_varname = ifelse(
+            grepl("^begin repeat", .data$type, TRUE),
+            stringr::str_replace(
+              .data$regex_varname,
+              r"(\[0-9\]\+\$)",
+              "count"
+            ),
+            .data$regex_varname
+          ),
+          multi_select = ifelse(
+            # For now handling only non-repeat fields
+            .data$is_slt_multi & .data$repeat_level == 0,
+            purrr::pmap_chr(
+              list(
+                .data$name,
+                .data$repeat_level,
+                .data$is_slt_multi,
+                "_values"
+              ),
+              \(n, r, m, mp) gen_regex_varname(n, r, m, mp)
+            ),
+            NA
+          )
         )
-        dplyr::mutate(df, !!!new_cols)
-      },
-      .init = tidy_data
-    )
-  }, error = function(e) {
-    message(paste("Failed to add missing binary variables:", conditionMessage(e)))
-    tidy_data
-  })
+    },
+    error = function(e) {
+      message(paste("Failed to parse XLSForm:", conditionMessage(e)))
+    }
+  )
 
+  tryCatch(
+    {
+      cs_dates <- c("CompletionDate", "SubmissionDate")
+      all_fields <- survey$regex_varname[!survey$is_null_fields]
+      null_fields <- survey$regex_varname[survey$is_null_fields]
+      numeric_fields <- survey$regex_varname[survey$is_numeric]
+      multi_field <- survey$regex_varname[survey$is_slt_multi]
+      date_fields <- survey$regex_varname[survey$is_date]
+      datetime_fields <- c(cs_dates, survey$regex_varname[survey$is_datetime])
+      media_fields <- survey$regex_varname[survey$is_media]
+      gps_fields <- survey$regex_varname[survey$is_gps]
+    },
+    error = function(e) {
+      message(paste("Failed to categorize fields:", conditionMessage(e)))
+    }
+  )
 
-  columns_order <- tryCatch({
-    purrr::map(
-      all_fields,
-      function(pattern) {
-        matches <- grep(pattern, names(tidy_data), value = TRUE)
-        if (length(matches) == 0) return(NULL)
+  multi_choices <- tryCatch(
+    {
+      readxl::read_excel(fp, sheet = "choices") |>
+        mutate(value = suppressWarnings(as.numeric(.data$value))) |>
+        # A binary column only ever exists for an integer choice value, so a
+        # decimal one would name a column the export cannot contain.
+        dplyr::filter(!is.na(.data$value), .data$value == round(.data$value)) |>
+        mutate(value = str_replace_all(.data$value, "-", "_")) |>
+        select("list_name", "value") |>
+        dplyr::right_join(
+          survey |>
+            dplyr::filter(!is.na(.data$multi_select)) |>
+            mutate(list_name = str_extract(.data$type, "(?<= )\\S+")) |>
+            select("name", "list_name", "multi_select"),
+          by = "list_name",
+          relationship = "many-to-many"
+        ) |>
+        mutate(var_name = str_glue("{name}_{value}")) |>
+        select("name", "var_name") |>
+        tidyr::nest(.by = "name") |>
+        purrr::pluck("data")
+    },
+    error = function(e) {
+      message(paste(
+        "Failed to prepare missing binary variables:",
+        conditionMessage(e)
+      ))
+    }
+  )
 
-        if (pattern %in% multi_field) {
-          sorted_matches <- stringr::str_sort(matches, numeric = TRUE)
-          standard <- sorted_matches[!grepl("__", sorted_matches)]
-          special  <- sorted_matches[grepl("__", sorted_matches)]
-          return(c(standard, special))
-        } else {
-          return(matches)
-        }
-      }) |>
-      purrr::flatten_chr() |>
-      unique()
-  }, error = function(e) {
-    message(paste("Failed to prepare column orders:", conditionMessage(e)))
-  })
-
-  tidy_data <- tryCatch({
-    select(
-      tidy_data,
-      any_of(cs_dates),
-      any_of(columns_order),
-      everything()
-    )
-  }, error = function(e) {
-    message(paste("Failed to order columns:", conditionMessage(e)))
-    tidy_data
-  })
-
-  tidy_data <- tryCatch({
-    if (length(null_fields) > 0) {
-      select(tidy_data, !matches(null_fields))
-    } else tidy_data
-  }, error = function(e) {
-    message(paste("Failed to drop null columns:", conditionMessage(e)))
-    tidy_data
-  })
-
-
-  tidy_data <- tryCatch({
-    if (length(multi_field) > 0) {
+  tidy_data <- tryCatch(
+    {
       purrr::reduce(
-      multi_field,
-      function(df, pattern) {
-        cols <- grep(pattern, names(df), value = TRUE)
-        if (length(cols) == 0) return(df)
-        df |>
-          dplyr::mutate(
-            any_selected = dplyr::if_any(dplyr::all_of(cols), ~ .x == "1"),
-            dplyr::across(
-              dplyr::all_of(cols),
-              ~ dplyr::if_else(.data$any_selected, dplyr::coalesce(.x, "0"), .x)
-            )
-          ) |>
-          dplyr::select(!"any_selected")
-      },
-      .init = tidy_data
-    )
-    } else tidy_data
-  }, error = function(e) {
-    message(paste("Failed to replace 0 for binaries:", conditionMessage(e)))
-    tidy_data
-  })
-
-  tidy_data <- tryCatch({
-    mutate(
-      tidy_data,
-      across(
-        matches(datetime_fields),
-        ~ as.POSIXct(.x, format = "%B %d, %Y %I:%M:%S %p")
+        multi_choices,
+        function(df, fields_tbl) {
+          fields <- fields_tbl$var_name
+          add_vars <- setdiff(fields, names(df))
+          if (length(add_vars) == 0) {
+            return(df)
+          }
+          new_cols <- purrr::set_names(
+            replicate(length(add_vars), rep(NA, nrow(df)), simplify = FALSE),
+            add_vars
+          )
+          dplyr::mutate(df, !!!new_cols)
+        },
+        .init = tidy_data
       )
-    )
-  }, error = function(e) {
-    message(paste("Failed to parse datetime:", conditionMessage(e)))
-    tidy_data
-  })
+    },
+    error = function(e) {
+      message(paste(
+        "Failed to add missing binary variables:",
+        conditionMessage(e)
+      ))
+      tidy_data
+    }
+  )
 
-  tidy_data <- tryCatch({
-    if (length(numeric_fields) > 0) {
-      mutate(
+  columns_order <- tryCatch(
+    {
+      purrr::map(
+        all_fields,
+        function(pattern) {
+          matches <- grep(pattern, names(tidy_data), value = TRUE)
+          if (length(matches) == 0) {
+            return(NULL)
+          }
+
+          if (pattern %in% multi_field) {
+            sorted_matches <- stringr::str_sort(matches, numeric = TRUE)
+            standard <- sorted_matches[!grepl("__", sorted_matches)]
+            special <- sorted_matches[grepl("__", sorted_matches)]
+            return(c(standard, special))
+          } else {
+            return(matches)
+          }
+        }
+      ) |>
+        purrr::flatten_chr() |>
+        unique()
+    },
+    error = function(e) {
+      message(paste("Failed to prepare column orders:", conditionMessage(e)))
+    }
+  )
+
+  tidy_data <- tryCatch(
+    {
+      select(
         tidy_data,
-        across(matches(numeric_fields), as.numeric)
+        any_of(cs_dates),
+        any_of(columns_order),
+        everything()
       )
-    } else tidy_data
-  }, error = function(e) {
-    message(paste("Failed to convert numeric columns:", conditionMessage(e)))
-    tidy_data
-  })
+    },
+    error = function(e) {
+      message(paste("Failed to order columns:", conditionMessage(e)))
+      tidy_data
+    }
+  )
 
-  tidy_data <- tryCatch({
-    if (length(date_fields) > 0) {
-      mutate(
-        tidy_data,
-        across(matches(date_fields), ~ as.Date(.x, format = "%B %d, %Y"))
-      )
-    } else tidy_data
-  }, error = function(e) {
-    message(paste("Failed to parse date columns:", conditionMessage(e)))
-    tidy_data
-  })
+  tidy_data <- tryCatch(
+    {
+      if (length(null_fields) > 0) {
+        select(tidy_data, !matches(null_fields))
+      } else {
+        tidy_data
+      }
+    },
+    error = function(e) {
+      message(paste("Failed to drop null columns:", conditionMessage(e)))
+      tidy_data
+    }
+  )
 
-  tidy_data <- tryCatch({
-    if (length(media_fields) > 0) {
+  tidy_data <- tryCatch(
+    {
+      if (length(multi_field) > 0) {
+        purrr::reduce(
+          multi_field,
+          function(df, pattern) {
+            cols <- grep(pattern, names(df), value = TRUE)
+            if (length(cols) == 0) {
+              return(df)
+            }
+            df |>
+              dplyr::mutate(
+                # Leading dot: XLSForm names cannot start with one, so this
+                # cannot overwrite a question of the same name.
+                .any_selected = dplyr::if_any(dplyr::all_of(cols), ~ .x == "1"),
+                dplyr::across(
+                  dplyr::all_of(cols),
+                  ~ dplyr::if_else(
+                    .data$.any_selected,
+                    dplyr::coalesce(.x, "0"),
+                    .x
+                  )
+                )
+              ) |>
+              dplyr::select(!".any_selected")
+          },
+          .init = tidy_data
+        )
+      } else {
+        tidy_data
+      }
+    },
+    error = function(e) {
+      message(paste("Failed to replace 0 for binaries:", conditionMessage(e)))
+      tidy_data
+    }
+  )
+
+  tidy_data <- tryCatch(
+    {
       mutate(
         tidy_data,
         across(
-          matches(media_fields),
-          ~ ifelse(grepl("^https", .x, TRUE), basename(.x), .x)
+          matches(datetime_fields),
+          ~ as.POSIXct(.x, format = "%B %d, %Y %I:%M:%S %p")
         )
       )
-    } else tidy_data
-  }, error = function(e) {
-    message(paste("Failed to clean media columns:", conditionMessage(e)))
-    tidy_data
-  })
-
-  tidy_data <- tryCatch({
-    if (length(gps_fields) > 0) {
-      nms <- names(tidy_data)
-      suffix <- c("lat", "long", "alt", "acc")
-      keep_idx <- sapply(gps_fields, function(pattern) {
-        actual_col <- grep(pattern, nms, value = TRUE)
-        if (length(actual_col) == 0) {
-          return(FALSE)
-        }
-        check_fld <- paste0(actual_col[1], "_", suffix[1])
-        !(check_fld %in% nms)
-      })
-      gps_fields <- gps_fields[keep_idx]
+    },
+    error = function(e) {
+      message(paste("Failed to parse datetime:", conditionMessage(e)))
+      tidy_data
     }
+  )
 
-    if (length(gps_fields) > 0) {
-      tidyr::separate_wider_delim(
-        data = tidy_data,
-        cols = matches(gps_fields),
-        delim = " ",
-        names = c("lat", "long", "alt", "acc"),
-        names_sep = "_",
-        too_few = "align_start",
-        cols_remove = FALSE
+  tidy_data <- tryCatch(
+    {
+      if (length(numeric_fields) > 0) {
+        mutate(
+          tidy_data,
+          across(matches(numeric_fields), as.numeric)
+        )
+      } else {
+        tidy_data
+      }
+    },
+    error = function(e) {
+      message(paste("Failed to convert numeric columns:", conditionMessage(e)))
+      tidy_data
+    }
+  )
+
+  tidy_data <- tryCatch(
+    {
+      if (length(date_fields) > 0) {
+        mutate(
+          tidy_data,
+          across(matches(date_fields), ~ as.Date(.x, format = "%B %d, %Y"))
+        )
+      } else {
+        tidy_data
+      }
+    },
+    error = function(e) {
+      message(paste("Failed to parse date columns:", conditionMessage(e)))
+      tidy_data
+    }
+  )
+
+  tidy_data <- tryCatch(
+    {
+      if (length(media_fields) > 0) {
+        mutate(
+          tidy_data,
+          across(
+            matches(media_fields),
+            ~ ifelse(grepl("^https", .x, TRUE), basename(.x), .x)
+          )
+        )
+      } else {
+        tidy_data
+      }
+    },
+    error = function(e) {
+      message(paste("Failed to clean media columns:", conditionMessage(e)))
+      tidy_data
+    }
+  )
+
+  tidy_data <- tryCatch(
+    split_gps_columns(tidy_data, gps_fields),
+    error = function(e) {
+      message(paste("Failed to split gps columns:", conditionMessage(e)))
+      tidy_data
+    }
+  )
+
+  tidy_data <- tryCatch(
+    {
+      mutate(
+        tidy_data,
+        across(dplyr::where(is.character), readr::parse_guess)
       )
-    } else tidy_data
-  }, error = function(e) {
-    message(paste("Failed to split gps columns:", conditionMessage(e)))
-    tidy_data
-  })
-
-  tidy_data <- tryCatch({
-    mutate(
-      tidy_data,
-      across(is.character, readr::parse_guess)
-    )
-  }, error = function(e) {
-    message(paste("Failed to guess column types:", conditionMessage(e)))
-    tidy_data
-  })
-
+    },
+    error = function(e) {
+      message(paste("Failed to guess column types:", conditionMessage(e)))
+      tidy_data
+    }
+  )
 
   return(tidy_data)
 }

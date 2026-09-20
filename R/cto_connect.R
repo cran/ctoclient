@@ -71,6 +71,15 @@ cto_connect <- function(
   assert_string(username)
   assert_string(password, null.ok = TRUE)
   assert_flag(cookies)
+  assert_url_safe(server, "server")
+
+  if (grepl("\\.surveycto\\.com$", server, ignore.case = TRUE)) {
+    cli_warn(c(
+      "!" = "{.arg server} looks like a full host name.",
+      "i" = "Use the server name only, such as {.val myserver} instead of
+             {.val myserver.surveycto.com}."
+    ))
+  }
 
   if (get_verbose()) {
     cli_progress_step(
@@ -88,21 +97,30 @@ cto_connect <- function(
     httr2::req_throttle(capacity = 30, fill_time_s = 60) |>
     httr2::req_error(
       body = function(resp) {
-        if (
-          httr2::resp_has_body(resp) &&
-            httr2::resp_content_type(resp) == "application/json"
-        ) {
-          r <- httr2::resp_body_json(resp)
-          if (is.list(r$error)) {
-            code <- str_glue("Code: {r$error$code}")
-            message <- str_glue("Message: {r$error$message}")
-          } else if (is.character(r$error)) {
-            code <- str_glue("Code: {r$code}")
-            message <- str_glue("Message: {r$error}")
-          }
-          return(c(code, message))
+        # Anything unexpected here must fall through to httr2's own message
+        # rather than raise a second error and hide the real failure.
+        if (!httr2::resp_has_body(resp)) {
+          return(NULL)
         }
-        return(NULL)
+        # resp_content_type() is NA when the response carries no Content-Type.
+        if (!isTRUE(httr2::resp_content_type(resp) == "application/json")) {
+          return(NULL)
+        }
+        r <- tryCatch(httr2::resp_body_json(resp), error = function(e) NULL)
+
+        if (is.list(r$error)) {
+          c(
+            str_glue("Code: {r$error$code}"),
+            str_glue("Message: {r$error$message}")
+          )
+        } else if (is.character(r$error)) {
+          c(
+            str_glue("Code: {r$code}"),
+            str_glue("Message: {r$error}")
+          )
+        } else {
+          NULL
+        }
       }
     )
 
@@ -123,6 +141,7 @@ cto_connect <- function(
   req$server <- server
   class(req) <- c(class(req), "cto_session")
   assign(".session", req, envir = .ctoclient_env)
+  assign(".form_ids", NULL, envir = .ctoclient_env)
   invisible(req)
 }
 

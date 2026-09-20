@@ -92,7 +92,7 @@ cto_form_definition <- function(
 
   if (!is.null(version)) {
     df <- dplyr::filter(df_versions, .data$formVersion == version)
-    if (nrow(df) == 0 && nrow(df_versions) > 0) {
+    if (nrow(df) == 0) {
       cli_abort(c(
         "x" = "{col_blue(form_id)} doesn't have the specified form version: {.val {version}}",
         "i" = "Use {.run ctoclient::cto_form_metadata()} to see available form versions"

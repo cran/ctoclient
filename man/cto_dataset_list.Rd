@@ -39,10 +39,10 @@ team_ds <- cto_dataset_list(team_id = "team-123", order_by = "title")
 }
 }
 \seealso{
-Other Dataset Management Functions: 
-\code{\link{cto_dataset_create}()},
-\code{\link{cto_dataset_delete}()},
-\code{\link{cto_dataset_download}()},
-\code{\link{cto_dataset_info}()}
+Other Dataset Management Functions:
+\code{\link[=cto_dataset_create]{cto_dataset_create()}},
+\code{\link[=cto_dataset_delete]{cto_dataset_delete()}},
+\code{\link[=cto_dataset_download]{cto_dataset_download()}},
+\code{\link[=cto_dataset_info]{cto_dataset_info()}}
 }
 \concept{Dataset Management Functions}

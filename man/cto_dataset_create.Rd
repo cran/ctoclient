@@ -88,10 +88,10 @@ joining_field = "hh_id"
 }
 }
 \seealso{
-Other Dataset Management Functions: 
-\code{\link{cto_dataset_delete}()},
-\code{\link{cto_dataset_download}()},
-\code{\link{cto_dataset_info}()},
-\code{\link{cto_dataset_list}()}
+Other Dataset Management Functions:
+\code{\link[=cto_dataset_delete]{cto_dataset_delete()}},
+\code{\link[=cto_dataset_download]{cto_dataset_download()}},
+\code{\link[=cto_dataset_info]{cto_dataset_info()}},
+\code{\link[=cto_dataset_list]{cto_dataset_list()}}
 }
 \concept{Dataset Management Functions}

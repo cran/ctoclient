@@ -1,0 +1,196 @@
+---
+title: "Managing Connections"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Managing Connections}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+Efficiently managing connections is the foundation of a robust data pipeline.
+`ctoclient` is designed to handle both simple single-server scripts and the
+multi-server setups common in large-scale research projects.
+
+## 1. Authentication strategies
+
+**Security first.** Never store passwords directly in your R scripts. If you
+share your code or push it to GitHub, your credentials go with it.
+
+### The .Renviron approach
+
+The most common way to manage credentials is the `.Renviron` file.
+
+1. Call `usethis::edit_r_environ()`.
+2. Add your credentials:
+
+```
+CTO_SERVER=myorg
+CTO_USER=admin@example.com
+CTO_PASS=mypassword123
+```
+
+3. Restart R for the change to take effect.
+4. Connect:
+
+```{r}
+library(ctoclient)
+
+cto_connect(
+  server   = Sys.getenv("CTO_SERVER"),
+  username = Sys.getenv("CTO_USER"),
+  password = Sys.getenv("CTO_PASS")
+)
+```
+
+Note that `.Renviron` entries are plain `NAME=value` lines, not R code, and
+that values containing spaces or `#` should be quoted.
+
+### Interactive mode
+
+If you are working locally and have not set up environment variables, omit the
+password and you will be prompted for it securely:
+
+```{r}
+cto_connect(server = "myorg", username = "admin@example.com")
+```
+
+### The system keyring
+
+For the strongest option on a personal machine, keep the password in your
+operating system's credential store with the
+[keyring](https://keyring.r-lib.org/) package. The secret never touches a file
+in your project:
+
+```{r}
+# Once, interactively:
+keyring::key_set("ctoclient", username = "admin@example.com")
+
+# In every script from then on:
+cto_connect(
+  server   = "myorg",
+  username = "admin@example.com",
+  password = keyring::key_get("ctoclient", username = "admin@example.com")
+)
+```
+
+## 2. What a session is
+
+`cto_connect()` authenticates, verifies the credentials, and stores the
+resulting request object inside the package. Every other function picks it up
+on its own, which is why you never pass a connection around:
+
+```{r}
+cto_connect("myorg", "admin@example.com")
+
+# No connection argument anywhere
+cto_form_ids()
+cto_form_data("baseline_survey")
+cto_dataset_list()
+```
+
+`cto_is_connected()` reports whether a session currently exists. It tells you
+that `cto_connect()` has been called, not that the server is reachable right
+now:
+
+```{r}
+cto_is_connected()
+#> [1] TRUE
+```
+
+### Cookies
+
+By default `cto_connect()` preserves cookies and handles the CSRF token for
+you. Keep it that way. A number of functions reach console endpoints rather
+than REST endpoints, and they abort on a session that carries no cookies:
+
+- `cto_form_data()`
+- `cto_form_metadata()` and `cto_form_definition()`
+- `cto_form_languages()`, `cto_form_printable()`,
+  `cto_form_stata_template()` and `cto_form_mail_template()`
+- `cto_metadata()`
+
+`cto_form_dofile()` and `cto_form_docx()` are in the same position
+indirectly, since both download the form definition first. In other words,
+`cookies = FALSE` leaves you with the dataset functions, the attachment
+downloads and the listing functions, and little else.
+
+## 3. Working with more than one server
+
+Some projects move data between servers, or aggregate across organizations.
+`cto_connect()` returns the session invisibly, so you can capture each one and
+switch between them with `cto_set_connection()`.
+
+```{r}
+conn_staging <- cto_connect("org-staging", "admin@example.com")
+conn_prod    <- cto_connect("org-prod", "admin@example.com")
+
+# The most recent connect() is the active one, so this reads from prod
+data_prod <- cto_form_data("baseline_survey")
+
+# Switch to staging and write the same data to a dataset there
+cto_set_connection(conn_staging)
+cto_dataset_upload("aggregated_data", file = "data/baseline.csv")
+```
+
+Because the active session is global, a script that switches servers should
+switch deliberately and close to the call that depends on it. Interleaving
+reads from two servers without an intervening `cto_set_connection()` is the
+easiest way to fetch from the wrong one.
+
+`cto_dataset_upload()` takes a path to a CSV in its `file` argument. To upload
+a data frame you have in memory, write it out first:
+
+```{r}
+tmp <- tempfile(fileext = ".csv")
+readr::write_csv(data_prod, tmp)
+cto_dataset_upload("aggregated_data", file = tmp)
+```
+
+## 4. Customizing the underlying request
+
+Every session is an `httr2` request object, so anything `httr2` can do to a
+request you can do to a connection before handing it back to the package.
+
+```{r}
+library(httr2)
+
+custom <- conn_prod |>
+  req_user_agent("MyResearchBot/1.0") |>
+  req_retry(max_tries = 5) |>
+  req_timeout(120)
+
+cto_set_connection(custom)
+cto_form_data("my_form")
+```
+
+This is the supported way to change retry behaviour, timeouts, proxies or
+headers. Two things to keep in mind: the package sets its own throttle
+(30 requests per minute) which you should only raise if you know your server
+tolerates it, and SurveyCTO rejects parallel requests from the same account
+with a 409, so a retry policy is more useful to you than concurrency.
+
+## 5. Verbosity
+
+Most functions report progress through the console. To silence them — in a
+scheduled job, say — set the option:
+
+```{r}
+options(ctoclient.verbose = FALSE)
+```
+
+Set it back to `TRUE`, or unset it, to get the messages again.
+
+## See also
+
+- [Working with form data](form-data.html) for what happens to submissions
+  after they are downloaded.
+- [Automating a pipeline](https://guturago.github.io/ctoclient/articles/automation.html) for credentials in CI and
+  scheduled jobs.

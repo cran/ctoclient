@@ -64,18 +64,20 @@ cto_form_dofile <- function(form_id, path = NULL) {
     settings = readxl::read_excel(fp, sheet = "settings")
   )
 
-  if (!is.null(path)) {
-    cli_progress_step(
-      "Writing {.val {form_id}} Stata do-file to {.file {path}}"
-    )
-  } else {
-    cli_progress_step("Writing {.val {form_id}} Stata do-file")
+  if (verbose) {
+    if (!is.null(path)) {
+      cli_progress_step(
+        "Writing {.val {form_id}} Stata do-file to {.file {path}}"
+      )
+    } else {
+      cli_progress_step("Writing {.val {form_id}} Stata do-file")
+    }
   }
 
   # --- 1. Header Generation ---
   ts <- format(Sys.time(), format = '%b %d, %Y at %H:%M %Z')
   t1 <- center_text(str_glue("{toupper(form_id)} VARIABLE AND VALUE LABELS"))
-  t2 <- center_text(str_glue("Generated on {ts} by 'scto' Package in R"))
+  t2 <- center_text(str_glue("Generated on {ts} by 'ctoclient' Package in R"))
 
   header_content <- str_glue(
     strrep("*", 80),
@@ -95,7 +97,7 @@ cto_form_dofile <- function(form_id, path = NULL) {
     }
 
     if (length(matches) > 1) {
-      default_lang <- form$settings$default_language
+      default_lang <- form$settings$default_language[1]
       dl <- if (
         is.null(default_lang) || is.na(default_lang) || default_lang == ""
       ) {
@@ -103,7 +105,11 @@ cto_form_dofile <- function(form_id, path = NULL) {
       } else {
         default_lang
       }
-      matches_lang <- matches[grepl(dl, matches, TRUE)]
+      # SurveyCTO writes the default language as "English (en)", so `dl` has
+      # to be matched literally rather than as a regular expression.
+      matches_lang <- matches[
+        stringr::str_detect(matches, stringr::fixed(dl, ignore_case = TRUE))
+      ]
       if (length(matches_lang) > 0) {
         return(matches_lang[1])
       }
@@ -144,22 +150,23 @@ cto_form_dofile <- function(form_id, path = NULL) {
     mutate(
       value = suppressWarnings(as.numeric(.data$value)),
       list_name = str_squish(.data$list_name),
-      label_clean = .data[[val_label_col]] |>
-        str_remove_all("<[^<>]*>") |>
-        str_replace_all('"', "'") |>
+      label_clean = stata_escape_label(.data[[val_label_col]]) |>
         str_squish()
     ) |>
     dplyr::filter(
       !is.na(.data$value),
-      !grepl("^\\$\\{.*\\}$", .data$label_clean)
-      )
+      # Stata value labels take integers only.
+      .data$value == round(.data$value),
+      !is.na(.data$label_clean),
+      !grepl("^\\\\\\$\\{.*\\}$", .data$label_clean)
+    )
 
   # Generate 'label define' commands for select_one
   choice_sets_s1 <- choices_all |>
     dplyr::filter(.data$list_name %in% valid_choices_s1) |>
     dplyr::summarise(
       stata_cmd = paste0(
-        'label define ',
+        'cap label define ',
         dplyr::first(.data$list_name),
         ' ',
         paste0(.data$value, ' "', .data$label_clean, '"', collapse = " "),
@@ -181,9 +188,21 @@ cto_form_dofile <- function(form_id, path = NULL) {
     ) |>
     dplyr::group_split(.data$list_name)
 
-  names(multi_lookup) <- sort(unique(choices_all$list_name[
-    choices_all$list_name %in% valid_choices_sm
-  ]))
+  # Take the names from the groups themselves: group_split() and sort() do
+  # not agree once list names mix case, which silently attached one list's
+  # labels to another list's variables.
+  names(multi_lookup) <- purrr::map_chr(multi_lookup, ~ .x$list_name[1])
+
+  # --- 4b. Date and Time Fields ---
+  null_block <- build_null_block(form_null_vars(survey$name, survey$type))
+
+  dt_vars <- form_datetime_vars(survey$name, survey$type)
+
+  datetime_block <- build_datetime_block(
+    dt_vars$datetime,
+    dt_vars$date,
+    format(Sys.time(), "%Y")
+  )
 
   # --- 5. Process Variables ---
 
@@ -211,6 +230,7 @@ cto_form_dofile <- function(form_id, path = NULL) {
 
       is_repeat = .data$repeat_level > 0,
       is_slt_multi = grepl("^select_multiple", .data$type, TRUE),
+      is_num_type = grepl("^integer$|^decimal$", .data$type, TRUE),
       list_name_raw = str_extract(.data$type, "(?<= )\\S+"),
       list_name = ifelse(
         .data$is_slt_multi,
@@ -223,7 +243,7 @@ cto_form_dofile <- function(form_id, path = NULL) {
         NA_character_
       ),
       is_null_fields = grepl(
-        "^note|^begin group|^end group|^begin repeat|^end repeat",
+        "^note|^begin[ _]group|^end[ _]group|^begin[ _]repeat|^end[ _]repeat",
         .data$type,
         TRUE
       )
@@ -237,10 +257,7 @@ cto_form_dofile <- function(form_id, path = NULL) {
       ),
 
       # Efficient cleaning of the label column
-      cleaned_label = .data[[var_label_col]] |>
-        str_remove_all("<[^<>]*>") |>
-        str_replace_all(stringr::fixed("${"), "\\${") |>
-        str_replace_all('"', "'") |>
+      cleaned_label = stata_escape_label(.data[[var_label_col]]) |>
         str_replace_all("\\\n", " ") |>
         str_squish(),
 
@@ -281,9 +298,10 @@ cto_form_dofile <- function(form_id, path = NULL) {
             "\t\t\tcap label variable `var' \"",
             v,
             "\"\n",
-            "\t\t\tcap note `var': \"",
+            "\t\t\tcap note `var': ",
             vn,
-            "\"\n",
+            "\n",
+            "\t\t\tcap destring `var', replace\n",
             "\t\t\tcap label values `var' slt_multi_binary\n"
           )
 
@@ -339,15 +357,25 @@ cto_form_dofile <- function(form_id, path = NULL) {
         "\t\tif regexm(\"`var'\", \"",
         .data$regex_varname,
         "\") {\n",
+        ifelse(
+          .data$is_num_type,
+          "\t\t\tcap destring `var', replace\n",
+          ""
+        ),
         "\t\t\tcap label variable `var' \"",
         .data$var_label,
         "\"\n",
-        "\t\t\tcap note `var': \"",
+        "\t\t\tcap note `var': ",
         .data$var_note,
-        "\"\n",
+        "\n",
         ifelse(
           .data$has_list,
-          paste0("\t\t\tcap label values `var' ", .data$list_name, "\n"),
+          paste0(
+            "\t\t\tcap destring `var', replace\n",
+            "\t\t\tcap label values `var' ",
+            .data$list_name,
+            "\n"
+          ),
           ""
         ),
         "\t\t}\n",
@@ -361,19 +389,31 @@ cto_form_dofile <- function(form_id, path = NULL) {
     dplyr::filter(!.data$is_slt_multi & !.data$is_repeat) |>
     mutate(
       stata_cmd = str_c(
+        ifelse(
+          .data$is_num_type,
+          paste0("cap destring ", .data$name, ", replace\n"),
+          ""
+        ),
         "cap label variable ",
         .data$name,
         " \"",
         .data$var_label,
         "\"\n",
-        "cap note variable ",
+        "cap note ",
         .data$name,
-        " \"",
+        ": ",
         .data$var_note,
-        "\"",
         ifelse(
           .data$has_list,
-          paste0("\ncap label values ", .data$name, " ", .data$list_name),
+          paste0(
+            "\ncap destring ",
+            .data$name,
+            ", replace",
+            "\ncap label values ",
+            .data$name,
+            " ",
+            .data$list_name
+          ),
           ""
         )
       )
@@ -387,6 +427,22 @@ cto_form_dofile <- function(form_id, path = NULL) {
 
   do_file_content <- c(
     header_content,
+    if (length(null_block) > 0) {
+      c(
+        paste0("*", center_text(" EMPTY FIELDS ", "-"), "*"),
+        "",
+        null_block,
+        ""
+      )
+    },
+    if (length(datetime_block) > 0) {
+      c(
+        paste0("*", center_text(" DATE AND TIME FIELDS ", "-"), "*"),
+        "",
+        datetime_block,
+        ""
+      )
+    },
     paste0("*", center_text(" VALUE LABELS ", "-"), "*"),
     "",
     "label define slt_multi_binary 1 \"Yes\" 0 \"No\", modify",
@@ -420,7 +476,11 @@ cto_form_dofile <- function(form_id, path = NULL) {
   #do_file_content <- sub('(") - ', '\\1', do_file_content)
 
   if (!is.null(path)) {
-    writeLines(do_file_content, path)
+    # readxl returns UTF-8, but writeLines() would otherwise re-encode to the
+    # session's native encoding and mangle non-ASCII labels on Windows.
+    con <- file(path, open = "wb")
+    on.exit(close(con), add = TRUE)
+    writeLines(enc2utf8(do_file_content), con, useBytes = TRUE)
   }
   return(invisible(do_file_content))
 }

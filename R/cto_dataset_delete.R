@@ -26,6 +26,7 @@
 #' }
 cto_dataset_delete <- function(id) {
   assert_string(id)
+  assert_url_safe(id, "id")
   session <- get_session()
 
   if (get_verbose()) {
@@ -46,6 +47,7 @@ cto_dataset_delete <- function(id) {
 #' @rdname cto_dataset_delete
 cto_dataset_purge <- function(id) {
   assert_string(id)
+  assert_url_safe(id, "id")
   session <- get_session()
 
   if (get_verbose()) {

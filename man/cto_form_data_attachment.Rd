@@ -63,11 +63,13 @@ cto_form_data_attachment(
 }
 }
 \seealso{
-Other Form Management Functions: 
-\code{\link{cto_form_attachment}()},
-\code{\link{cto_form_data}()},
-\code{\link{cto_form_dofile}()},
-\code{\link{cto_form_languages}()},
-\code{\link{cto_form_metadata}()}
+Other Form Management Functions:
+\code{\link[=cto_docx_palette]{cto_docx_palette()}},
+\code{\link[=cto_form_attachment]{cto_form_attachment()}},
+\code{\link[=cto_form_data]{cto_form_data()}},
+\code{\link[=cto_form_docx]{cto_form_docx()}},
+\code{\link[=cto_form_dofile]{cto_form_dofile()}},
+\code{\link[=cto_form_languages]{cto_form_languages()}},
+\code{\link[=cto_form_metadata]{cto_form_metadata()}}
 }
 \concept{Form Management Functions}

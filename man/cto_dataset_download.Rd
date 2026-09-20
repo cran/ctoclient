@@ -45,10 +45,10 @@ paths <- cto_dataset_download(dir = "my_data_folder", overwrite = FALSE)
 }
 }
 \seealso{
-Other Dataset Management Functions: 
-\code{\link{cto_dataset_create}()},
-\code{\link{cto_dataset_delete}()},
-\code{\link{cto_dataset_info}()},
-\code{\link{cto_dataset_list}()}
+Other Dataset Management Functions:
+\code{\link[=cto_dataset_create]{cto_dataset_create()}},
+\code{\link[=cto_dataset_delete]{cto_dataset_delete()}},
+\code{\link[=cto_dataset_info]{cto_dataset_info()}},
+\code{\link[=cto_dataset_list]{cto_dataset_list()}}
 }
 \concept{Dataset Management Functions}

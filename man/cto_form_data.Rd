@@ -59,9 +59,18 @@ in form order.
 \item \strong{Media fields:} Strips URLs from image, audio, and video fields,
 leaving only the filename.
 \item \strong{Geopoints:} Splits geopoint variables into four columns with
-\verb{_latitude}, \verb{_longitude}, \verb{_altitude}, and \verb{_accuracy} suffixes when
-not already present.
+\verb{_lat}, \verb{_long}, \verb{_alt}, and \verb{_acc} suffixes. The original column is
+kept under its own name.
+\item \strong{Select multiple:} Adds the binary columns that the export omits
+when no respondent picked an option, and fills unselected options with
+\code{0} for rows that selected at least one. A row that selected nothing
+keeps \code{NA}, so "asked and answered none" stays distinct from
+"never asked".
 }
+
+Each step is applied independently: if one fails, a message naming the
+step is printed and the remaining steps still run, so a partial failure
+returns data rather than an error.
 }
 \examples{
 \dontrun{
@@ -73,11 +82,13 @@ clean <- cto_form_data("my_form_id", private_key = "keys/my_key.pem")
 }
 }
 \seealso{
-Other Form Management Functions: 
-\code{\link{cto_form_attachment}()},
-\code{\link{cto_form_data_attachment}()},
-\code{\link{cto_form_dofile}()},
-\code{\link{cto_form_languages}()},
-\code{\link{cto_form_metadata}()}
+Other Form Management Functions:
+\code{\link[=cto_docx_palette]{cto_docx_palette()}},
+\code{\link[=cto_form_attachment]{cto_form_attachment()}},
+\code{\link[=cto_form_data_attachment]{cto_form_data_attachment()}},
+\code{\link[=cto_form_docx]{cto_form_docx()}},
+\code{\link[=cto_form_dofile]{cto_form_dofile()}},
+\code{\link[=cto_form_languages]{cto_form_languages()}},
+\code{\link[=cto_form_metadata]{cto_form_metadata()}}
 }
 \concept{Form Management Functions}

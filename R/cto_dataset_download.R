@@ -40,6 +40,10 @@ cto_dataset_download <- function(id = NULL, dir = getwd(), overwrite = FALSE) {
   assert_directory(dir)
   assert_flag(overwrite)
 
+  if (!is.null(id)) {
+    assert_url_safe(id, "id")
+  }
+
   if (is.null(id)) {
     id <- purrr::pluck(cto_dataset_list(), "id")
     if (length(id) == 0) {
@@ -50,7 +54,7 @@ cto_dataset_download <- function(id = NULL, dir = getwd(), overwrite = FALSE) {
 
   session <- httr2::req_url_query(session, asAttachment = TRUE)
 
-  file_names <- paste0(id, ".csv")
+  file_names <- paste0(basename(id), ".csv")
   paths_all <- file.path(dir, file_names)
 
   to_download <- if (overwrite) {

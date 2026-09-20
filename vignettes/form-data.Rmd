@@ -1,0 +1,212 @@
+---
+title: "Working with Form Data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Working with Form Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+`cto_form_data()` does two things. It downloads submissions, and then — unless
+you tell it not to — it reshapes them into something you can analyse. The
+second half is where most of the package's value is, and also where most of
+the surprises are, so this article walks through exactly what it does.
+
+```{r}
+library(ctoclient)
+
+cto_connect("myorg", "admin@example.com")
+
+data <- cto_form_data("baseline_survey")
+```
+
+## 1. Choosing what to download
+
+Four arguments control the request itself.
+
+```{r}
+data <- cto_form_data(
+  form_id     = "baseline_survey",
+  private_key = "keys/baseline.pem",
+  start_date  = as.POSIXct("2026-01-01"),
+  status      = c("approved", "pending"),
+  tidy        = TRUE
+)
+```
+
+**`start_date`** asks the server for submissions received after a timestamp,
+so it is a genuine reduction in what crosses the network, not a filter applied
+afterwards. It must be a `POSIXct`; the default reaches back to 2000. This is
+the argument that makes incremental pulls cheap — see
+[Automating a pipeline](https://guturago.github.io/ctoclient/articles/automation.html).
+
+**`status`** takes any combination of `"approved"`, `"rejected"` and
+`"pending"`. All three are included by default, which is worth knowing: if
+your team uses the review workflow, the data you get back contains rejected
+submissions unless you say otherwise.
+
+```{r}
+approved <- cto_form_data("baseline_survey", status = "approved")
+```
+
+**`private_key`** is the path to a `.pem` file, required only for encrypted
+forms. The key is sent with the request and never stored.
+
+**`tidy`** is covered below.
+
+If the form has no submissions matching the request, you get a warning and an
+empty result rather than an error.
+
+## 2. What `tidy = FALSE` gives you
+
+`tidy = FALSE` returns the parsed JSON exactly as SurveyCTO's wide export
+provides it. Every column is character, dates are American-format strings,
+geopoints are single space-separated strings, media fields are full URLs, and
+every structural row in your form — notes, group markers — is present as a
+column.
+
+```{r}
+raw <- cto_form_data("baseline_survey", tidy = FALSE)
+```
+
+Use it when you want the server's output verbatim: to archive it, to compare
+against a colleague's Stata pipeline, or to debug something the tidying step
+got wrong. Note that `tidy = FALSE` also skips the form-definition download,
+so it is the faster of the two and the only one that works without the form
+definition being available.
+
+## 3. What tidying actually does
+
+With `tidy = TRUE`, `cto_form_data()` downloads the form's XLSForm definition
+and uses it to decide what each column is. The steps run in this order.
+
+### Missing `select_multiple` columns are added
+
+SurveyCTO's wide export creates one binary column per choice, named
+`question_value` — but only for choices somebody actually picked. A choice no
+respondent selected produces no column at all, which means the shape of your
+data depends on your respondents.
+
+`ctoclient` reads the choice list from the form definition and adds the
+missing columns, so `crops_1` through `crops_5` all exist whether or not
+anyone grew crop 4.
+
+One deliberate exception: a choice whose value is not a whole number is
+skipped, because the export could never have produced a column for it.
+
+### Structural fields are dropped
+
+Notes, `begin group`, `end group` and `end repeat` rows carry no data, so
+their columns go. `begin repeat` is kept, because the export turns it into a
+`<name>_count` column telling you how many times the group repeated.
+
+### Columns are reordered
+
+`CompletionDate` and `SubmissionDate` come first, then your questions in the
+order the form asks them, then anything left over. For `select_multiple`
+questions the binary columns are sorted by choice value, with the
+`other`-style columns last.
+
+### Unselected options are filled with zero — conditionally
+
+This is the subtlest step. For each `select_multiple` question, a row that
+selected *at least one* option has its remaining binaries set to `0`. A row
+that selected *nothing at all* keeps `NA` across every binary for that
+question.
+
+That distinction is deliberate and it matters: it separates "this household
+grows no crops" from "we never asked this household about crops", which is
+what you want when the question sat behind a relevance condition. If you
+would rather have zeros everywhere, do it yourself afterwards.
+
+### Types are converted
+
+| Form type | Becomes |
+|---|---|
+| `datetime`, `start`, `end`, plus `CompletionDate` and `SubmissionDate` | `POSIXct` |
+| `date`, `today` | `Date` |
+| `select_one`, `integer`, `decimal`, `sensor_*` | numeric |
+| `image`, `audio`, `video`, `file`, audits | character, URL stripped to the filename |
+| `geopoint` | split into four numeric columns, see below |
+
+Anything still character afterwards goes through `readr::parse_guess()`, which
+is what turns `text` questions holding only numbers into numeric columns. If
+you have an ID field of digits that must stay character — a phone number with
+a leading zero, say — check it, because this step will have converted it.
+
+### Geopoints are split
+
+A `geopoint` column arrives as `"9.03 38.74 2355 4.9"`. It is split into four
+numeric columns with `_lat`, `_long`, `_alt` and `_acc` suffixes:
+
+```{r}
+names(data)[grepl("^gps", names(data))]
+#> [1] "gps"      "gps_lat"  "gps_long" "gps_alt"  "gps_acc"
+```
+
+The original column is kept under its own name. If you need the raw point —
+to hand to another tool, or to check a split that looks wrong — it is still
+there.
+
+## 4. Repeat groups
+
+A repeat group is exported wide: a question `plot_size` inside a repeat
+becomes `plot_size_1`, `plot_size_2` and so on, one per iteration, plus a
+`<repeat_name>_count` column. Nesting adds another index, so a question two
+repeats deep becomes `field_1_2`.
+
+`ctoclient` types and orders all of these correctly, but it does not reshape
+them into long form, because only you know which shape you want. `tidyr` does
+the rest:
+
+```{r}
+library(tidyr)
+
+plots <- data |>
+  pivot_longer(
+    cols = matches("^plot_(size|id)_[0-9]+$"),
+    names_to = c(".value", "plot_number"),
+    names_pattern = "^(plot_(?:size|id))_([0-9]+)$"
+  ) |>
+  drop_na(plot_id)
+```
+
+## 5. When tidying goes wrong
+
+Each tidying step is wrapped individually. If one fails — an unexpected type,
+a malformed geopoint, a form definition that will not parse — the function
+prints a message naming the step and carries on with the remaining steps.
+
+The practical consequence is that a partial failure returns data rather than
+an error, so a message like
+
+```
+Failed to parse date columns: ...
+```
+
+means the result is real data with one step skipped, not a failed download.
+In an unattended job, that message is the thing to watch for. If you would
+rather see the raw export in that situation, re-run with `tidy = FALSE` and
+compare.
+
+## 6. A note on running it twice
+
+`cto_form_data()` is not idempotent over its own output: it expects the
+server's raw export, not an already-tidied data frame. Always tidy a fresh
+download rather than passing a tidied frame back through anything that
+assumes raw input.
+
+## See also
+
+- [Attachments and media](https://guturago.github.io/ctoclient/articles/attachments.html) to download the files these
+  columns name.
+- [Documenting and reviewing a form](https://guturago.github.io/ctoclient/articles/form-documentation.html) to see the
+  definition that drives all of the above.

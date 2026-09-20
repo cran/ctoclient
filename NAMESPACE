@@ -8,11 +8,15 @@ export(cto_dataset_info)
 export(cto_dataset_list)
 export(cto_dataset_purge)
 export(cto_dataset_upload)
+export(cto_docx_palette)
 export(cto_form_attachment)
 export(cto_form_data)
+export(cto_form_data_attachment)
 export(cto_form_definition)
+export(cto_form_docx)
 export(cto_form_dofile)
 export(cto_form_ids)
+export(cto_form_languages)
 export(cto_form_mail_template)
 export(cto_form_metadata)
 export(cto_form_printable)
@@ -24,33 +28,44 @@ export(cto_role_list)
 export(cto_set_connection)
 export(cto_team_list)
 export(cto_user_list)
-importFrom(checkmate,assert_character)
-importFrom(checkmate,assert_directory)
-importFrom(checkmate,assert_flag)
-importFrom(checkmate,assert_string)
-importFrom(cli,cli_abort)
-importFrom(cli,cli_inform)
-importFrom(cli,cli_progress_step)
-importFrom(cli,cli_warn)
-importFrom(cli,col_blue)
-importFrom(dplyr,across)
-importFrom(dplyr,mutate)
-importFrom(dplyr,select)
-importFrom(httr2,req_perform)
-importFrom(httr2,req_url)
-importFrom(httr2,req_url_path)
-importFrom(httr2,req_url_query)
-importFrom(httr2,resp_body_json)
-importFrom(httr2,resp_body_raw)
+importFrom(checkmate,
+  assert_character,
+  assert_directory,
+  assert_flag,
+  assert_string
+)
+importFrom(cli,
+  cli_abort,
+  cli_inform,
+  cli_progress_step,
+  cli_warn,
+  col_blue
+)
+importFrom(dplyr,
+  across,
+  mutate,
+  select
+)
+importFrom(httr2,
+  req_perform,
+  req_url,
+  req_url_path,
+  req_url_query,
+  resp_body_json,
+  resp_body_raw
+)
 importFrom(rlang,.data)
-importFrom(rlang,`:=`)
-importFrom(stringr,str_c)
-importFrom(stringr,str_extract)
-importFrom(stringr,str_glue)
-importFrom(stringr,str_remove_all)
-importFrom(stringr,str_replace_all)
-importFrom(stringr,str_squish)
-importFrom(tidyr,all_of)
-importFrom(tidyr,any_of)
-importFrom(tidyr,everything)
-importFrom(tidyr,matches)
+importFrom(stringr,
+  str_c,
+  str_extract,
+  str_glue,
+  str_remove_all,
+  str_replace_all,
+  str_squish
+)
+importFrom(tidyr,
+  all_of,
+  any_of,
+  everything,
+  matches
+)
