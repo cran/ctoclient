@@ -197,3 +197,70 @@ test_that(
     expect_no_match(out, "cap confirm variable `dtvar'", fixed = TRUE)
   }
 )
+
+test_that(
+  "one loop labels a repeat question bare and indexed",
+  {
+    out <- paste(dofile(), collapse = "\n")
+
+    # the index is optional and repeatable, so the bare name and every
+    # nested copy are handled without lines of their own
+    expect_match(out, "if regexm(\"`var\'\", \"^plot_size(_[0-9]+)*$\")", fixed = TRUE)
+    expect_match(out, "\tunab vars : plot_size*\n\tforeach var of local vars {", fixed = TRUE)
+
+    # nothing outside the loop refers to the bare name
+    expect_no_match(out, "\tcap label variable plot_size ", fixed = TRUE)
+    expect_no_match(out, "\tcap destring plot_size, replace", fixed = TRUE)
+  }
+)
+
+test_that(
+  "only a select_one is treated as carrying a value label",
+  {
+    # "fixtures/audittest.xlsx" holds the types whose names contain a space
+    # but name no choice list: text audit, audio audit, sensor_statistic
+    local_mocked_bindings(
+      cto_form_definition = function(...) test_path("fixtures", "audittest.xlsx"),
+      .package = "ctoclient"
+    )
+    old <- options(ctoclient.verbose = FALSE)
+    on.exit(options(old), add = TRUE)
+    out <- paste(cto_form_dofile("audittest"), collapse = "\n")
+
+    # the select_one keeps its destring and value label
+    expect_match(out, "cap destring owns, replace", fixed = TRUE)
+    expect_match(out, "cap label values owns yn", fixed = TRUE)
+    # an integer is still destrung
+    expect_match(out, "cap destring age, replace", fixed = TRUE)
+
+    # the audits hold file names: labelling them is fine, destringing them
+    # and giving them a value label named after the second word is not
+    expect_match(out, "cap label variable audit_txt \"Text audit\"", fixed = TRUE)
+    expect_no_match(out, "cap destring audit_txt", fixed = TRUE)
+    expect_no_match(out, "cap destring audit_aud", fixed = TRUE)
+    expect_no_match(out, "cap destring sens_acc", fixed = TRUE)
+    expect_no_match(out, "label values audit_txt audit", fixed = TRUE)
+    expect_no_match(out, "label values audit_aud audit", fixed = TRUE)
+    expect_no_match(out, "label values sens_acc acc", fixed = TRUE)
+  }
+)
+
+test_that(
+  "each variable's commands are separated by a blank line",
+  {
+    p <- file.path(tempdir(), "spacing.do")
+    on.exit(unlink(p), add = TRUE)
+    dofile(path = p)
+    txt <- readLines(p, warn = FALSE)
+
+    # a variable's own commands stay together
+    i <- which(txt == "cap label variable today \"Today\"")
+    expect_length(i, 1L)
+    expect_identical(txt[i + 1L], "cap note today: Today")
+
+    # and the next variable begins after one blank line, not straight after
+    expect_identical(txt[i + 2L], "")
+    expect_false(txt[i + 3L] == "")
+    expect_match(txt[i + 3L], "^cap ")
+  }
+)

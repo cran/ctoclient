@@ -30,6 +30,7 @@ raw_export <- function() {
     crops_1 = c("1", NA),
     gps = c("9.03 38.74 2355 4.9", "8.98 38.80 2400 5.1"),
     illness_1 = c("1", NA),
+    plot_rpt_count = c("1", "1"),
     plot_size_1 = c("2", "3"),
     stringsAsFactors = FALSE
   )
@@ -145,5 +146,44 @@ test_that(
   {
     expect_warning(out <- tidy_export(list()), "No submissions")
     expect_length(out, 0)
+  }
+)
+
+
+test_that(
+  "a repeat counter is placed in form order, not left at the end",
+  {
+    out <- tidy_export()
+
+    # the counter belongs to the begin repeat row, so it is ordered with the
+    # form rather than swept to the end by everything()
+    expect_true("plot_rpt_count" %in% names(out))
+    expect_lt(
+      match("plot_rpt_count", names(out)),
+      match("plot_size_1", names(out))
+    )
+    # and it is not the last column, which is where an unrecognised column
+    # would land
+    expect_lt(match("plot_rpt_count", names(out)), length(names(out)))
+  }
+)
+
+
+test_that(
+  "the tidying step parses timestamps the platform format cannot read",
+  {
+    # A CRAN macOS check turned every datetime into NA while the plain date
+    # parsed fine, so the pipeline must not depend on the platform reading
+    # "%B %d, %Y %I:%M:%S %p". The padded strings below are ones it genuinely
+    # cannot read here either.
+    raw <- raw_export()
+    raw$interview_dt <- c("  March 12, 2026 10:05:00 AM  ", raw$interview_dt[2])
+    raw$visit_date <- c("  March 12, 2026  ", raw$visit_date[2])
+
+    out <- tidy_export(raw)
+
+    expect_s3_class(out$interview_dt, "POSIXct")
+    expect_equal(format(out$interview_dt[1], "%H:%M:%S"), "10:05:00")
+    expect_equal(as.character(out$visit_date[1]), "2026-03-12")
   }
 )

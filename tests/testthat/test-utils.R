@@ -8,8 +8,8 @@ test_that(
   "gen_regex_varname() anchors plain variable names",
   {
     expect_identical(gen_regex_varname("age", 0, FALSE), "^age$")
-    expect_identical(gen_regex_varname("age", 1, FALSE), "^age_[0-9]+$")
-    expect_identical(gen_regex_varname("age", 2, FALSE), "^age_[0-9]+_[0-9]+$")
+    expect_identical(gen_regex_varname("age", 1, FALSE), "^age(_[0-9]+)*$")
+    expect_identical(gen_regex_varname("age", 2, FALSE), "^age(_[0-9]+)*$")
   }
 )
 
@@ -17,7 +17,7 @@ test_that(
   "gen_regex_varname() appends the select_multiple suffix",
   {
     expect_identical(gen_regex_varname("crops", 0, TRUE), "^crops_*[0-9]+$")
-    expect_identical(gen_regex_varname("crops", 1, TRUE), "^crops_*[0-9]+_[0-9]+$")
+    expect_identical(gen_regex_varname("crops", 1, TRUE), "^crops_*[0-9]+(_[0-9]+)*$")
     expect_identical(gen_regex_varname("crops", 0, TRUE, "_values"), "^crops_values$")
   }
 )
@@ -30,13 +30,15 @@ test_that(
       grep(gen_regex_varname("age", 0, FALSE), nms, value = TRUE),
       "age"
     )
+    # a repeat variable matches the bare name and every indexed copy
     expect_identical(
       grep(gen_regex_varname("age", 1, FALSE), nms, value = TRUE),
-      "age_1"
+      c("age", "age_1", "age_1_2")
     )
+    # the index repeats, so a nested copy is matched at any depth
     expect_identical(
       grep(gen_regex_varname("age", 2, FALSE), nms, value = TRUE),
-      "age_1_2"
+      c("age", "age_1", "age_1_2")
     )
     expect_identical(
       grep(gen_regex_varname("crops", 0, TRUE), nms, value = TRUE),
@@ -416,10 +418,18 @@ test_that(
 )
 
 test_that(
-  "build_null_block() matches a stub at any repeat depth",
+  "build_null_block() matches a bare stub at any repeat depth",
   {
     txt <- paste(build_null_block("n1"), collapse = "\n")
     expect_match(txt, "if regexm(\"`var'\", \"^`stub'(_[0-9]+)*$\")", fixed = TRUE)
+
+    # bare, indexed, and nested all count; anything else does not
+    rx <- "^n1(_[0-9]+)*$"
+    expect_true(grepl(rx, "n1"))
+    expect_true(grepl(rx, "n1_7"))
+    expect_true(grepl(rx, "n1_1_2"))
+    expect_false(grepl(rx, "n1_other"))
+    expect_false(grepl(rx, "n1x"))
   }
 )
 
@@ -481,5 +491,115 @@ test_that(
   "build_null_block() emits nothing when there is nothing to drop",
   {
     expect_length(build_null_block(character(0)), 0)
+  }
+)
+
+
+# ---- repeat counters in cto_form_data() ----
+
+test_that(
+  "a begin repeat resolves to its exported counter column",
+  {
+    # cto_form_data() builds this pattern from the repeat level. It used to be
+    # produced by editing "[0-9]+$" out of gen_regex_varname()'s output, which
+    # silently stopped working once that pattern gained a quantifier.
+    counter <- function(name, level) {
+      paste0("^", name, strrep("_[0-9]+", pmax(level - 1, 0)), "_count")
+    }
+
+    expect_identical(counter("rpt", 1), "^rpt_count")
+    expect_identical(counter("rpt", 2), "^rpt_[0-9]+_count")
+
+    expect_true(grepl(counter("rpt", 1), "rpt_count"))
+    expect_true(grepl(counter("rpt", 2), "rpt_1_count"))
+
+    # and the question pattern must not be mistaken for the counter
+    expect_false(grepl(gen_regex_varname("rpt", 1, FALSE), "rpt_count"))
+  }
+)
+
+
+# ---- SurveyCTO timestamps ----
+
+test_that(
+  "normalise_cto_timestamp() rewrites an export timestamp without a locale",
+  {
+    expect_identical(
+      normalise_cto_timestamp("March 12, 2026 10:05:00 AM"),
+      "2026-03-12 10:05:00"
+    )
+    # noon stays at 12, midnight becomes 00
+    expect_identical(
+      normalise_cto_timestamp("July 4, 2026 12:00:00 PM"),
+      "2026-07-04 12:00:00"
+    )
+    expect_identical(
+      normalise_cto_timestamp("July 4, 2026 12:30:00 AM"),
+      "2026-07-04 00:30:00"
+    )
+    expect_identical(
+      normalise_cto_timestamp("December 31, 2026 11:59:59 PM"),
+      "2026-12-31 23:59:59"
+    )
+    # a date with no time keeps just the date
+    expect_identical(normalise_cto_timestamp("March 12, 2026"), "2026-03-12")
+    # strptime takes the abbreviated month for %B, so this does too
+    expect_identical(normalise_cto_timestamp("Mar 12, 2026"), "2026-03-12")
+  }
+)
+
+test_that(
+  "normalise_cto_timestamp() returns NA for anything it cannot read",
+  {
+    expect_true(is.na(normalise_cto_timestamp(NA_character_)))
+    expect_true(is.na(normalise_cto_timestamp("")))
+    expect_true(is.na(normalise_cto_timestamp("Marchx 12, 2026")))
+    expect_true(is.na(normalise_cto_timestamp("2026-03-12")))
+  }
+)
+
+test_that(
+  "the parsers read an export timestamp whatever the platform does",
+  {
+    # These assert the value the parser must produce, never what the
+    # platform's own strptime makes of the string: a CRAN M1 mac reads
+    # "%B %d, %Y %I:%M:%S %p" as NA throughout, so comparing against it
+    # compares against a moving target.
+    x <- c("March 12, 2026 10:05:00 AM", "July 4, 2026 12:00:00 PM", NA)
+    expect_identical(
+      format(parse_cto_datetime(x), "%Y-%m-%d %H:%M:%S"),
+      c("2026-03-12 10:05:00", "2026-07-04 12:00:00", NA)
+    )
+
+    d <- c("March 12, 2026", "December 1, 2026", NA)
+    expect_identical(
+      as.character(parse_cto_date(d)),
+      c("2026-03-12", "2026-12-01", NA)
+    )
+  }
+)
+
+test_that(
+  "the parsers read a timestamp the platform format cannot",
+  {
+    # Padding is one thing no platform's strptime accepts for this format,
+    # so these only pass through the rewritten, all-numeric path.
+    expect_identical(
+      format(parse_cto_datetime("  March 12, 2026 10:05:00 AM  "), "%H:%M:%S"),
+      "10:05:00"
+    )
+    expect_identical(
+      as.character(parse_cto_date("  March 12, 2026  ")),
+      "2026-03-12"
+    )
+  }
+)
+
+test_that(
+  "the parsers leave a column that is already a date alone",
+  {
+    now <- as.POSIXct("2026-03-12 10:05:00")
+    expect_identical(parse_cto_datetime(now), now)
+    expect_identical(parse_cto_date(as.Date("2026-03-12")), as.Date("2026-03-12"))
   }
 )

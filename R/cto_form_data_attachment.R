@@ -98,9 +98,15 @@ cto_form_data_attachment <- function(
   paths_to_fetch <- file_paths[to_download]
 
   if (length(paths_to_fetch) > 0) {
+    # A form can carry thousands of photos, so this reports how far along the
+    # download is rather than only that it started.
+    n <- length(paths_to_fetch)
     if (verbose) {
-      cli_progress_step(
-        "Downloading {.val {length(paths_to_fetch)}} attachment{?s}"
+      bar <- cli_progress_bar(
+        format = "Downloaded{cli::pb_percent} ({cli::pb_current}) of {cli::pb_total} attachments",
+        format_done = "Downloaded {cli::pb_total} attachments",
+        type = "download",
+        total = n
       )
     }
     if (!is.null(private_key)) {
@@ -121,8 +127,15 @@ cto_form_data_attachment <- function(
             cli_warn("{col_blue(basename(p))}: {conditionMessage(e)}")
           }
         )
+        if (verbose) {
+          cli_progress_update(id = bar)
+        }
       }
     )
+
+    if (verbose) {
+      cli_progress_done(id = bar)
+    }
   }
 
   invisible(file_paths[file.exists(file_paths)])

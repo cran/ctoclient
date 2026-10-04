@@ -14,6 +14,16 @@ demo_form <- function() {
 }
 
 docx <- function(path = NULL, ...) {
+  # flextable is loaded on the first flextable:: call rather than when the
+  # package is attached, and it imports gdtools, whose binary is linked
+  # against XQuartz on macOS. A machine without XQuartz cannot load it, so
+  # there is no document to test and the error says nothing about this
+  # package.
+  skip_if_not(
+    requireNamespace("flextable", quietly = TRUE),
+    "flextable could not be loaded; its system libraries are missing"
+  )
+
   local_mocked_bindings(
     cto_form_definition = function(...) test_path("fixtures", "demoform.xlsx"),
     .package = "ctoclient"

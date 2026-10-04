@@ -1,8 +1,8 @@
 Package: ctoclient
 Type: Package
 Title: A Modern and Flexible Data Pipeline for 'SurveyCTO'
-Version: 0.2.0
-Date: 2026-09-20
+Version: 0.2.3
+Date: 2026-10-04
 Authors@R: c(
     person(
       "Gutama Girja", "Urago",
@@ -33,9 +33,9 @@ Depends: R (>= 4.1.0)
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.1.0
 NeedsCompilation: no
-Packaged: 2026-09-20 12:26:04 UTC; Gute
+Packaged: 2026-10-04 15:28:55 UTC; Gute
 Author: Gutama Girja Urago [aut, cre, cph] (ORCID:
     <https://orcid.org/0000-0001-5588-2301>)
 Maintainer: Gutama Girja Urago <girjagutama@gmail.com>
 Repository: CRAN
-Date/Publication: 2026-09-20 12:40:02 UTC
+Date/Publication: 2026-10-04 23:00:43 UTC

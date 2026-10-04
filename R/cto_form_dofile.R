@@ -267,7 +267,11 @@ cto_form_dofile <- function(form_id, path = NULL) {
         80
       ),
       var_note = .data$cleaned_label,
-      has_list = !is.na(.data$list_name) & !.data$is_slt_multi
+      # Only a select_one carries a value label. Any other type whose name
+      # holds a space - "text audit", "audio audit", "sensor_statistic acc" -
+      # would otherwise have its second word read as a choice list and get a
+      # destring and a label values it has no use for.
+      has_list = grepl("^select_one", .data$type, TRUE) & !is.na(.data$list_name)
     ) |>
     dplyr::filter(.data$var_label != "" & !is.na(.data$var_label))
 
@@ -451,8 +455,9 @@ cto_form_dofile <- function(form_id, path = NULL) {
     "",
     paste0("*", center_text(" VARIABLE LABELS ", "-"), "*"),
     "",
-    labels_set[["stata_cmd"]],
-    "",
+    # One blank line after each variable, so a long block of labels reads as
+    # one group per variable rather than a single wall of commands.
+    paste0(labels_set[["stata_cmd"]], "\n"),
     "",
     paste0("*", center_text(" DEFAULT FIELDS ", "-"), "*"),
     "",

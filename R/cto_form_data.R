@@ -185,12 +185,17 @@ cto_form_data <- function(
             list(.data$name, .data$repeat_level, .data$is_slt_multi),
             \(n, r, m) gen_regex_varname(n, r, m)
           ),
+          # A begin repeat has no column of its own: the export gives it a
+          # counter named "<name>_count", carrying one index per enclosing
+          # repeat. The pattern is built here rather than edited out of the
+          # one above, which only worked while that one ended in "[0-9]+$".
           regex_varname = ifelse(
-            grepl("^begin repeat", .data$type, TRUE),
-            stringr::str_replace(
-              .data$regex_varname,
-              r"(\[0-9\]\+\$)",
-              "count"
+            grepl("^begin[ _]repeat", .data$type, TRUE),
+            paste0(
+              "^",
+              .data$name,
+              strrep("_[0-9]+", pmax(.data$repeat_level - 1, 0)),
+              "_count"
             ),
             .data$regex_varname
           ),
@@ -391,7 +396,7 @@ cto_form_data <- function(
         tidy_data,
         across(
           matches(datetime_fields),
-          ~ as.POSIXct(.x, format = "%B %d, %Y %I:%M:%S %p")
+          parse_cto_datetime
         )
       )
     },
@@ -423,7 +428,7 @@ cto_form_data <- function(
       if (length(date_fields) > 0) {
         mutate(
           tidy_data,
-          across(matches(date_fields), ~ as.Date(.x, format = "%B %d, %Y"))
+          across(matches(date_fields), parse_cto_date)
         )
       } else {
         tidy_data

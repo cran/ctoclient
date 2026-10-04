@@ -1,4 +1,5 @@
 #' @importFrom cli cli_abort cli_warn cli_inform col_blue cli_progress_step
+#' @importFrom cli cli_progress_bar cli_progress_update cli_progress_done
 #' @importFrom stringr str_c str_glue str_extract str_squish str_replace_all str_remove_all
 #' @importFrom httr2 req_url req_url_path req_url_query req_perform resp_body_json resp_body_raw
 #' @importFrom checkmate assert_string assert_flag assert_character assert_directory
@@ -179,6 +180,82 @@ fetch_paginated_response <- function(req, path, field = "data", max_pages = 1000
   }
 
   return(out)
+}
+
+# SurveyCTO timestamps, without relying on the platform's strptime ----
+# The export writes an English month name and a 12-hour clock, so parsing it
+# needs %B and %p. Both are handed to the C library and are not read the same
+# way everywhere: a CRAN macOS check returned NA for every "%I:%M:%S %p"
+# timestamp while the plain date parsed fine. Rewriting the string with
+# month.name, a base constant that is always English, leaves a date that only
+# needs numeric conversion specifiers.
+normalise_cto_timestamp <- function(x) {
+  parts <- stringr::str_match(
+    str_squish(x),
+    paste0(
+      "^([A-Za-z]+) +([0-9]{1,2}), *([0-9]{4})",
+      "(?: +([0-9]{1,2}):([0-9]{2}):([0-9]{2}) *([AaPp])[Mm])?$"
+    )
+  )
+
+  # month.name and month.abb are base constants and always English, so the
+  # lookup does not move with the session's locale. strptime accepts the
+  # abbreviated form for %B, so this accepts it too.
+  name <- tolower(parts[, 2])
+  month <- match(name, tolower(month.name))
+  month[is.na(month)] <- match(name[is.na(month)], tolower(month.abb))
+  day <- suppressWarnings(as.integer(parts[, 3]))
+  year <- suppressWarnings(as.integer(parts[, 4]))
+  hour <- suppressWarnings(as.integer(parts[, 5]))
+  half <- tolower(parts[, 8])
+
+  # 12-hour clock to 24-hour: noon stays, midnight becomes zero.
+  hour <- ifelse(!is.na(hour) & half == "p" & hour < 12L, hour + 12L, hour)
+  hour <- ifelse(!is.na(hour) & half == "a" & hour == 12L, 0L, hour)
+
+  date <- ifelse(
+    is.na(month) | is.na(day) | is.na(year),
+    NA_character_,
+    sprintf("%04d-%02d-%02d", year, month, day)
+  )
+
+  ifelse(
+    is.na(date) | is.na(hour),
+    date,
+    sprintf("%s %02d:%s:%s", date, hour, parts[, 6], parts[, 7])
+  )
+}
+
+# Both parsers try the platform first and only rewrite what it left missing,
+# so a platform that reads the format keeps exactly the result it had before.
+parse_cto_datetime <- function(x) {
+  out <- as.POSIXct(x, format = "%B %d, %Y %I:%M:%S %p")
+  if (!is.character(x)) {
+    return(out)
+  }
+  retry <- !is.na(x) & is.na(out)
+  if (any(retry)) {
+    out[retry] <- as.POSIXct(
+      normalise_cto_timestamp(x[retry]),
+      format = "%Y-%m-%d %H:%M:%S"
+    )
+  }
+  out
+}
+
+parse_cto_date <- function(x) {
+  out <- as.Date(x, format = "%B %d, %Y")
+  if (!is.character(x)) {
+    return(out)
+  }
+  retry <- !is.na(x) & is.na(out)
+  if (any(retry)) {
+    out[retry] <- as.Date(
+      normalise_cto_timestamp(x[retry]),
+      format = "%Y-%m-%d"
+    )
+  }
+  out
 }
 
 # Escape a label for use inside a Stata double-quoted string ----
@@ -584,7 +661,10 @@ gen_regex_varname <- function(name, rpt_lvl, multi, mp = "_*[0-9]+") {
       return(paste0("^", name, "$"))
     }
   } else {
-    rpt <- strrep("_[0-9]+", rpt_lvl)
+    # The repeat index is optional and repeatable, so one pattern covers the
+    # bare name, the indexed copies an export normally has, and the further
+    # indices a nested repeat adds.
+    rpt <- "(_[0-9]+)*"
     if (multi) {
       return(paste0("^", name, mp, rpt, "$"))
     } else {

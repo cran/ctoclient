@@ -37,7 +37,10 @@ importFrom(checkmate,
 importFrom(cli,
   cli_abort,
   cli_inform,
+  cli_progress_bar,
+  cli_progress_done,
   cli_progress_step,
+  cli_progress_update,
   cli_warn,
   col_blue
 )
